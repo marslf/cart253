@@ -22,7 +22,7 @@ let stars = [];
 const maxStars = 50;
 
 /**
- * OH LOOK I DIDN'T DESCRIBE SETUP!!
+ *DESCRIBE SETUP
 */
 function setup() {
     createCanvas(600, 400);
@@ -30,7 +30,7 @@ function setup() {
 
 
 /**
- * OOPS I DIDN'T DESCRIBE WHAT MY DRAW DOES!
+ *DESCRIBE WHAT MY DRAW DOES
 */
 function draw() {
     noStroke();
@@ -96,14 +96,16 @@ function draw() {
         // Clear stars when moving back to day
         stars = [];
 
-
-        /**
-        * Draws the grass
-       */
-        push();
-        fill(69, 121, 66);
-        ellipse(100, 500, 700, 400)
-        ellipse(500, 500, 700, 500)
-        pop();
-
     }
+
+
+
+    /**
+    * Draws the grass
+   */
+    push();
+    fill(69, 121, 66);
+    ellipse(100, 500, 700, 400)
+    ellipse(500, 500, 700, 500)
+    pop();
+}
