@@ -13,13 +13,19 @@
 
 "use strict";
 
-//Declaring colour variables for background
+//Variables for background colour
 var redBackground = 255;
 var greenBackground = 127;
 var blueBackground = 80;
 
+//Variables for the stars
 let stars = [];
 const maxStars = 50;
+
+//Variables for the clouds
+let aCloudX = 0;
+let bCloudX = 450;
+let cCloudX = 225;
 
 /**
  *DESCRIBE SETUP
@@ -93,11 +99,38 @@ function draw() {
             }
         }
     } else {
+
         // Clear stars when moving back to day
         stars = [];
 
     }
 
+
+    /**
+    * Draws the clouds
+   */
+    push();
+    fill(225, 247, 252, 50);
+    ellipse(aCloudX, 130, 130, 50);
+    ellipse(bCloudX, 100, 160, 75);
+    ellipse(cCloudX, 115, 100, 40);
+    pop();
+
+    // Clouds move from left to right
+    aCloudX = aCloudX + 0.5
+    bCloudX = bCloudX + 0.8
+    cCloudX = cCloudX + 1
+
+    // Clouds reappear on the left when reach the right side 
+    if (aCloudX > 700) {
+        aCloudX = -60;
+    }
+    if (bCloudX > 700) {
+        bCloudX = -70;
+    }
+    if (cCloudX > 700) {
+        cCloudX = -60;
+    }
 
 
     /**
@@ -109,3 +142,4 @@ function draw() {
     ellipse(500, 500, 700, 500)
     pop();
 }
+
