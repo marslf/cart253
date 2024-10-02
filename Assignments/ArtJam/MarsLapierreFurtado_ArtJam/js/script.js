@@ -1,10 +1,19 @@
 /**
- * ART JAM
+ * ETERNAL DUSK
  * Mars Lapierre-Furtado
  * 
  * DESCRIPTION
+ * - Interactive sunset / sunrise scene
+ * - Background color shifts from pink to dark blue based on the sun's position (mouseY)
+ * - Stars appear when the sun sets and disappear as it rises
+ * - Three clouds move across the sky at different speeds, reappearing on the left side
+ * - User interaction: Sun moves up and down with mouseY, clouds change visibility with mouseX
+ * - map() function used to transition colors smoothly
+ * - Conditional logic controls star appearance and cloud visibility
  * 
  * Controls:
+ * Move the curser up and down to move the sun and make the stars appear
+ * Move the curser onto the sun to make the clouds disapear 
  * 
  * Uses:
  * p5.js
@@ -19,16 +28,17 @@ var greenBackground = 127;
 var blueBackground = 80;
 
 //Variables for the stars
-let stars = [];
+var stars = [];
 const maxStars = 50;
 
 //Variables for the clouds
-let aCloudX = 0;
-let bCloudX = 450;
-let cCloudX = 225;
+var aCloudX = 0;
+var bCloudX = 450;
+var cCloudX = 225;
+
 
 /**
- *DESCRIBE SETUP
+ * SETUP : create the canvas with the proper dimensions
 */
 function setup() {
     createCanvas(600, 400);
@@ -36,7 +46,12 @@ function setup() {
 
 
 /**
- *DESCRIBE WHAT MY DRAW DOES
+ * DRAW:
+ * - Change the background colour depending on mouseY
+ * - Draw the sun and make it move on the Y axis with mouseY
+ * - Draw the stars that eventually die and continually appear as long as mouseY > 270
+ * - Draw the clouds and make them move across the canvas from left to right at different speeds and restart once they diseappear 
+ * - Draw the grass using two large green ellipses at the bottom of the canvas
 */
 function draw() {
     noStroke();
@@ -65,7 +80,7 @@ function draw() {
 
 
     /**
-    * Draws the grass
+    * Draws the stars
    */
     if (mouseY > 270) {
         // Add new stars
@@ -109,7 +124,7 @@ function draw() {
     /**
     * Draws the clouds
    */
-    if (mouseX < 264 || mouseX > 330) {
+    if (mouseX < 264 || mouseX > 330) { //if the curser is touching the sun then the clouds disappear and once it moves away they will reappear 
         push();
         fill(225, 247, 252, 50);
         ellipse(aCloudX, 130, 130, 50);
@@ -133,6 +148,8 @@ function draw() {
             cCloudX = -60;
         }
     }
+
+
     /**
     * Draws the grass
    */
@@ -141,5 +158,6 @@ function draw() {
     ellipse(100, 500, 700, 400)
     ellipse(500, 500, 700, 500)
     pop();
-}
 
+
+}

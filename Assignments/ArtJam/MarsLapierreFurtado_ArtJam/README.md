@@ -5,8 +5,9 @@ Mars Lapierre-Furtado
 [View this project online](URL_FOR_THE_RUNNING_PROJECT)
 
 ## Description
-
-This description should help the reader understand what the program is, what any controls do, and perhaps what the desired experience it.
+This program creates an interactive sunrise / sunset scene using javascript. The sky transitions smoothly from day to night based on the position of the sun, which the user can control with the vertical movement of the mouse (mouseY). As the sun sets, stars begin to appear, and they fade away when the sun rises again. 
+Three clouds of different sizes move across the screen at varying speeds, creating a calm, dynamic atmosphere. The clouds continuously loop from right to left, and they can disappear if the position of the mouse (mouseX) intersects with the sun. 
+The goal is to create a relaxing, visual atmosphere where users can interact with the transition between day and night.
 
 ## Credits
 
