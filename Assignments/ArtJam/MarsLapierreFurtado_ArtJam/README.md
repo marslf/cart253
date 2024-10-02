@@ -2,7 +2,7 @@
 
 Mars Lapierre-Furtado
 
-[View this project online](URL_FOR_THE_RUNNING_PROJECT)
+[View this project online](https://marslf.github.io/cart253/Assignments/ArtJam/MarsLapierreFurtado_ArtJam/)
 
 ## Description
 This program creates an interactive sunrise / sunset scene using javascript. The sky transitions smoothly from day to night based on the position of the sun, which the user can control with the vertical movement of the mouse (mouseY). As the sun sets, stars begin to appear, and they fade away when the sun rises again. 
