@@ -109,30 +109,30 @@ function draw() {
     /**
     * Draws the clouds
    */
-    push();
-    fill(225, 247, 252, 50);
-    ellipse(aCloudX, 130, 130, 50);
-    ellipse(bCloudX, 100, 160, 75);
-    ellipse(cCloudX, 115, 100, 40);
-    pop();
+    if (mouseX < 264 || mouseX > 330) {
+        push();
+        fill(225, 247, 252, 50);
+        ellipse(aCloudX, 130, 130, 50);
+        ellipse(bCloudX, 100, 160, 75);
+        ellipse(cCloudX, 115, 100, 40);
+        pop();
 
-    // Clouds move from left to right
-    aCloudX = aCloudX + 0.5
-    bCloudX = bCloudX + 0.8
-    cCloudX = cCloudX + 1
+        // Clouds move from left to right
+        aCloudX = aCloudX + 0.5
+        bCloudX = bCloudX + 0.8
+        cCloudX = cCloudX + 1
 
-    // Clouds reappear on the left when reach the right side 
-    if (aCloudX > 700) {
-        aCloudX = -60;
+        // Clouds reappear on the left when reach the right side 
+        if (aCloudX > 700) {
+            aCloudX = -60;
+        }
+        if (bCloudX > 700) {
+            bCloudX = -70;
+        }
+        if (cCloudX > 700) {
+            cCloudX = -60;
+        }
     }
-    if (bCloudX > 700) {
-        bCloudX = -70;
-    }
-    if (cCloudX > 700) {
-        cCloudX = -60;
-    }
-
-
     /**
     * Draws the grass
    */
