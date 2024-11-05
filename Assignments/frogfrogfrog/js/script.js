@@ -91,16 +91,22 @@ function draw() {
         checkTongueFlyOverlap();
         drawScore();
 
-        //switch to Win state once maxScore is reached
+        //Check for win condition
         if (score >= maxScore) {
             gameState = "win";
         }
 
+        //Check for lose condition
         if (missedFlies >= 3) {
             gameState = "lose"
         }
+        // Draw the Win Screen
+    } else if (gameState === "win") {
+        drawWinScreen();
 
-
+        // Draw the Lose Screen
+    } else if (gameState === "lose") {
+        drawEndScreen();
     }
 
 }
