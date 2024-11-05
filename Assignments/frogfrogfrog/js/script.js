@@ -106,7 +106,7 @@ function draw() {
 
         // Draw the Lose Screen
     } else if (gameState === "lose") {
-        drawEndScreen();
+        drawLoseScreen();
     }
 
 }
@@ -141,7 +141,7 @@ function drawWinScreen() {
     pop();
 }
 
-function drawEndScreen() {
+function drawLoseScreen() {
     push();
     textAlign(CENTER, CENTER);
     textSize(32);
@@ -149,7 +149,7 @@ function drawEndScreen() {
     text("Game Over!", width / 2, height / 2 - 50);
     textSize(24);
     text("Score: " + score, width / 2, height / 2);
-    text("Missed Flies: " + missedFlies, width / 2, height / 2 + 30); // Display missed flies
+    text("You missed 3 flies!", width / 2, height / 2 + 30);
     text("Click to Restart", width / 2, height / 2 + 80);
     pop();
 }
@@ -263,6 +263,19 @@ function drawScore() {
     textSize(64);
     textAlign(RIGHT, TOP);
     text(score, width - 50, 50);
+    pop();
+}
+
+/**
+ * Display number of missed flies in red in the top left corner
+ */
+function drawMissedCount() {
+    push();
+    fill(255, 0, 0);
+    noStroke();
+    textSize(60);
+    textAlign(LEFT, TOP);
+    text(missedFlies + "/3", width - 50, 50);
     pop();
 }
 
