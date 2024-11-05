@@ -1,5 +1,5 @@
 /**
- * Frogfrogfrog
+ * Froggy Feast
  * Pippin Barr
  * 
  * A game of catching flies with your frog-tongue
@@ -18,15 +18,19 @@
  * New feature:
  * - When the tongue catches/touches a fly, add one to the score
  * - And diplay the score in the draw
- * - "Start" and "end" states (with buttons to start and restart game)
+ * - "Start" and "win" states (with buttons to start and restart game)
+ * - "lose" state if 3 flies are missed
  * 
  * 
  */
 
 "use strict";
 
-//Game states
-let gameState = "start" //States: "start" , "play1" , "end"
+//Game states (default = start)
+let gameState = "start" //States: "start" , "play1" , "win" "lose"
+
+//Variable to count the missed flies
+let missedFlies = 0;
 
 // Our frog
 const frog = {
@@ -49,7 +53,7 @@ const frog = {
 
 //The starting score
 let score = 0;
-const maxScore = 5; //Score to end the game 
+const maxScore = 5; //Score to win the game 
 
 // Our fly
 // Has a position, size, and speed of horizontal movement
@@ -87,14 +91,16 @@ function draw() {
         checkTongueFlyOverlap();
         drawScore();
 
-        //switch to End state once maxScore is reached
+        //switch to Win state once maxScore is reached
         if (score >= maxScore) {
-            gameState = "end";
+            gameState = "win";
         }
 
-        //Draw End Screen
-    } else if (gameState === "end") {
-        drawEndScreen();
+        if (missedFlies >= 3) {
+            gameState = "lose"
+        }
+
+
     }
 
 }
@@ -106,26 +112,39 @@ function draw() {
 function drawStartScreen() {
     push();
     textAlign(CENTER, CENTER);
-    textSize(32);
+    textSize(34);
     fill(255);
-    text("Frog Game", width / 2, height / 2 - 50);
+    text("Froggy Feast", width / 2, height / 2 - 50);
     textSize(24);
     text("Click to Start", width / 2, height / 2);
     pop();
 }
 
 /**
- * Draws the end screen with the score and restart button
+ * Draws the Win screen with the score and restart button
  */
+function drawWinScreen() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("You Win!", width / 2, height / 2 - 50);
+    textSize(24);
+    text("Score: " + score, width / 2, height / 2);
+    text("Click to Restart", width / 2, height / 2 + 50);
+    pop();
+}
+
 function drawEndScreen() {
     push();
     textAlign(CENTER, CENTER);
     textSize(32);
     fill(255);
-    text("Game Over", width / 2, height / 2 - 50);
+    text("Game Over!", width / 2, height / 2 - 50);
     textSize(24);
     text("Score: " + score, width / 2, height / 2);
-    text("Click to Restart", width / 2, height / 2 + 50);
+    text("Missed Flies: " + missedFlies, width / 2, height / 2 + 30); // Display missed flies
+    text("Click to Restart", width / 2, height / 2 + 80);
     pop();
 }
 
@@ -138,7 +157,13 @@ function moveFly() {
     fly.x += fly.speed;
     // Handle the fly going off the canvas
     if (fly.x > width) {
+        missedFlies++; // Add to the missed flies counter
         resetFly();
+
+        // Check if missed flies reach the limit
+        if (missedFlies >= 3) {
+            gameState = "lose"; // Change game state to end
+        }
     }
 }
 
@@ -263,13 +288,18 @@ function mousePressed() {
     if (gameState === "start") {
         gameState = "play1"; //When in game state start switch to state play 1)
         score = 0; // Reset score when game starts
+        missedFlies = 0; // Reset missed flies
+        resetFly(); // Reset fly position
 
     } else if (gameState === "play1") { //When in game state play1 Launch the tongue on click (if it's not launched yet)
         if (frog.tongue.state === "idle") {
             frog.tongue.state = "outbound";
         }
 
-    } else if (gameState === "end") { //When in state end switch to state start
+    } else if (gameState === "lose") { //When in state lose switch to state start
+        gameState = "start"; // Go back to start screen
+
+    } else if (gameState === "win") { //When in state win switch to state start
         gameState = "start"; // Go back to start screen
     }
 }
