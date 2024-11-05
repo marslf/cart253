@@ -21,7 +21,9 @@
  * - And diplay the score in the draw
  * - "Start" screen
  * - "Win" state if 5 flies are caught
- * - "lose" state if 3 flies are missed
+ * - "Lose" state if 3 flies are missed
+ * - Second stage which introduces a new fly type
+ * - Green flies which are slightly faster than regular flies 
  * 
  * 
  */
@@ -29,7 +31,7 @@
 "use strict";
 
 //Game states (default = start)
-let gameState = "start" //States: "start" , "play1" , "win" "lose"
+let gameState = "start" //States: "start" , "play1" , "play2" , "win" "lose"
 
 //Variable to count the missed flies
 let missedFlies = 0;
@@ -55,15 +57,24 @@ const frog = {
 
 //The starting score
 let score = 0;
-const maxScore = 5; //Score to win the game 
+const maxScore = 25; //Score to win the game 
 
-// Our fly
+// Regular fly
 // Has a position, size, and speed of horizontal movement
 const fly = {
     x: 0,
     y: 200, // Will be random
     size: 10,
     speed: 3
+};
+
+//Green fly
+const greenFly = {
+    x: 0,
+    y: 200, //will be random
+    size: 10,
+    speed: 5,
+    points: 3 //green flies will be worth 3 points instead of 1 
 };
 
 /**
@@ -90,7 +101,27 @@ function draw() {
         moveFrog();
         moveTongue();
         drawFrog();
-        checkTongueFlyOverlap();
+        checkTongueFlyOverlap(fly);
+        drawScore();
+        drawMissedCount();
+
+        //Check for second gamestate condition
+        if (score >= 10) {
+            gameState = "play2";
+        }
+
+        //Check for lose condition
+        if (missedFlies >= 3) {
+            gameState = "lose"
+        }
+        // Draw Game Screen 2
+    } else if (gameState === "play2") {
+        moveGreenFly();
+        drawGreenFly();
+        moveFrog();
+        moveTongue();
+        drawFrog();
+        checkTongueFlyOverlap(greenFly); // Check overlap with green flies
         drawScore();
         drawMissedCount();
 
@@ -103,6 +134,7 @@ function draw() {
         if (missedFlies >= 3) {
             gameState = "lose"
         }
+
         // Draw the Win Screen
     } else if (gameState === "win") {
         drawWinScreen();
@@ -144,6 +176,9 @@ function drawWinScreen() {
     pop();
 }
 
+/**
+ * Draws the Lose screen with the score and restart button 
+ */
 function drawLoseScreen() {
     push();
     textAlign(CENTER, CENTER);
@@ -171,7 +206,20 @@ function moveFly() {
 
         // Check if missed flies reach the limit
         if (missedFlies >= 3) {
-            gameState = "lose"; // Change game state to end
+            gameState = "lose";
+        }
+    }
+}
+
+function moveGreenFly() {
+    greenFly.x += greenFly.speed;
+    if (greenFly.x > width) {
+        missedFlies++; //Add to the missed flies counter
+        resetGreenFly(); //
+
+        // Check if missed flies reach the limit
+        if (missedFlies >= 3) {
+            gameState = "lose";
         }
     }
 }
@@ -188,11 +236,30 @@ function drawFly() {
 }
 
 /**
- * Resets the fly to the left with a random y
+ * Draws the fly as a green circle
+ */
+function drawGreenFly() {
+    push();
+    noStroke();
+    fill("#00ff00");
+    ellipse(greenFly.x, greenFly.y, greenFly.size);
+    pop();
+}
+
+/**
+ * Resets the regular fly to the left with a random y
  */
 function resetFly() {
     fly.x = 0;
     fly.y = random(0, 300);
+}
+
+/**
+ * Resets the green fly to the left with a random y
+ */
+function resetGreenFly() {
+    greenFly.x = 0;
+    greenFly.y = random(0, 300);
 }
 
 /**
@@ -278,23 +345,27 @@ function drawMissedCount() {
     noStroke();
     textSize(60);
     textAlign(LEFT, TOP);
-    text(missedFlies + "/3", width - 50, 50);
+    text(missedFlies + "/3", 20, 20);
     pop();
 }
 
 /**
  * Handles the tongue overlapping the fly
  */
-function checkTongueFlyOverlap() {
+function checkTongueFlyOverlap(fly) {
     // Get distance from tongue to fly
     const d = dist(frog.tongue.x, frog.tongue.y, fly.x, fly.y);
     // Check if it's an overlap
     const eaten = (d < frog.tongue.size / 2 + fly.size / 2);
     if (eaten) {
-        //Increase the score
-        score = score + 1;
-        // Reset the fly
-        resetFly();
+        // Increase score based on fly type
+        if (fly === greenFly) {
+            score += 3; // Add 3 points for green fly
+            resetGreenFly(); // Reset the green fly
+        } else {
+            score += 1; // Add 1 point for regular fly
+            resetFly(); // Reset the regular fly
+        }
         // Bring back the tongue
         frog.tongue.state = "inbound";
     }
@@ -318,10 +389,18 @@ function mousePressed() {
             frog.tongue.state = "outbound";
         }
 
-    } else if (gameState === "lose") { //When in state lose switch to state start
-        gameState = "start"; // Go back to start screen
-
-    } else if (gameState === "win") { //When in state win switch to state start
-        gameState = "start"; // Go back to start screen
+    } else if (gameState === "win" || gameState === "lose") {
+        resetGame(); // Reset game if player wants to restart
     }
+}
+
+/**
+ * Resets the game variables and states
+ */
+function resetGame() {
+    score = 0;
+    missedFlies = 0;
+    gameState = "start"; // Set back to start state
+    resetRegularFly(); // Reset regular fly
+    resetGreenFly(); // Reset green fly
 }
