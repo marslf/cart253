@@ -1,6 +1,6 @@
 /**
  * Froggy Feast
- * Pippin Barr
+ * Mars Lapierre-Furtado
  * 
  * A game of catching flies with your frog-tongue
  * 
@@ -8,6 +8,7 @@
  * - Move the frog with your mouse
  * - Click to launch the tongue
  * - Catch flies
+ * - If you miss 3 dlies, game over!
  * 
  * Made with p5
  * https://p5js.org/
@@ -18,7 +19,8 @@
  * New feature:
  * - When the tongue catches/touches a fly, add one to the score
  * - And diplay the score in the draw
- * - "Start" and "win" states (with buttons to start and restart game)
+ * - "Start" screen
+ * - "Win" state if 5 flies are caught
  * - "lose" state if 3 flies are missed
  * 
  * 
@@ -90,6 +92,7 @@ function draw() {
         drawFrog();
         checkTongueFlyOverlap();
         drawScore();
+        drawMissedCount();
 
         //Check for win condition
         if (score >= maxScore) {
@@ -149,7 +152,7 @@ function drawLoseScreen() {
     text("Game Over!", width / 2, height / 2 - 50);
     textSize(24);
     text("Score: " + score, width / 2, height / 2);
-    text("You missed 3 flies!", width / 2, height / 2 + 30);
+    text("Missed Flies: " + missedFlies + "/3", width / 2, height / 2 + 30);
     text("Click to Restart", width / 2, height / 2 + 80);
     pop();
 }
