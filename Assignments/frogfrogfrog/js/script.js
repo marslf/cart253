@@ -16,22 +16,17 @@
  * Add one to the score every time you catch a fly. Make the score visible as a number.
  * 
  * New feature:
- * When the tongue catches/touches a fly, add one to the score
- * And dsiplay the score in the draw
+ * - When the tongue catches/touches a fly, add one to the score
+ * - And dsiplay the score in the draw
+ * - "Start" and "end" states (with buttons to start and restart game)
  * 
- * New pseudocode: 
  * 
- * At the top: 
- * score = 0
- * 
- * In the if-statement that determines the fly was caught: 
- * score = score + 1 / scre += 1 / score++ 
- * 
- * In draw: 
- * Display the score in white in the top right corner
  */
 
 "use strict";
+
+//Game states
+let gameState = "start" //States: "start" , "play1" , "end"
 
 // Our frog
 const frog = {
@@ -54,6 +49,7 @@ const frog = {
 
 //The starting score
 let score = 0;
+const maxScore = 5; //Score to end the game 
 
 // Our fly
 // Has a position, size, and speed of horizontal movement
@@ -76,13 +72,61 @@ function setup() {
 
 function draw() {
     background("#87ceeb");
-    moveFly();
-    drawFly();
-    moveFrog();
-    moveTongue();
-    drawFrog();
-    checkTongueFlyOverlap();
-    drawScore();
+
+    //Draw the Start Screen
+    if (gameState === "start") {
+        drawStartScreen();
+
+        //Draw Game Screen 1
+    } if else (gameState === "play1"){
+        moveFly();
+        drawFly();
+        moveFrog();
+        moveTongue();
+        drawFrog();
+        checkTongueFlyOverlap();
+        drawScore();
+
+        //switch to End state once maxScore is reached
+        if (score >= maxScore) {
+            gameState = "end";
+        }
+
+        //Draw End Screen
+    } else if (gameState === "end") {
+        drawEndScreen();
+    }
+
+}
+
+
+/**
+ * Draws the start screen with a start button
+ */
+function drawStartScreen() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("Frog Game", width / 2, height / 2 - 50);
+    textSize(24);
+    text("Click to Start", width / 2, height / 2);
+    pop();
+}
+
+/**
+ * Draws the end screen with the score and restart button
+ */
+function drawEndScreen() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("Game Over", width / 2, height / 2 - 50);
+    textSize(24);
+    text("Score: " + score, width / 2, height / 2);
+    text("Click to Restart", width / 2, height / 2 + 50);
+    pop();
 }
 
 /**
