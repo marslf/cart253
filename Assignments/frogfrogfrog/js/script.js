@@ -253,11 +253,18 @@ function checkTongueFlyOverlap() {
     }
 }
 
-/**
- * Launch the tongue on click (if it's not launched yet)
- */
+
 function mousePressed() {
-    if (frog.tongue.state === "idle") {
-        frog.tongue.state = "outbound";
+    if (gameState === "start") {
+        gameState = "play1"; //When in game state start switch to state play 1)
+        score = 0; // Reset score when game starts
+
+    } else if (gameState === "play1") { //When in game state play1 Launch the tongue on click (if it's not launched yet)
+        if (frog.tongue.state === "idle") {
+            frog.tongue.state = "outbound";
+        }
+
+    } else if (gameState === "end") { //When in state end switch to state start
+        gameState = "start"; // Go back to start screen
     }
 }
