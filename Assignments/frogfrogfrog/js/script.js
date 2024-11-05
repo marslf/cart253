@@ -78,7 +78,7 @@ function draw() {
         drawStartScreen();
 
         //Draw Game Screen 1
-    } if else (gameState === "play1"){
+    } else if (gameState === "play1") {
         moveFly();
         drawFly();
         moveFrog();
