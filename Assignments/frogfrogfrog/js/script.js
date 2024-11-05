@@ -17,7 +17,7 @@
  * 
  * New feature:
  * - When the tongue catches/touches a fly, add one to the score
- * - And dsiplay the score in the draw
+ * - And diplay the score in the draw
  * - "Start" and "end" states (with buttons to start and restart game)
  * 
  * 
@@ -254,6 +254,11 @@ function checkTongueFlyOverlap() {
 }
 
 
+/**
+ * What mousePressed does depending on the game state
+ * Launch the tongue on click (if it's not launched yet)
+ * or start/restart the game
+ */
 function mousePressed() {
     if (gameState === "start") {
         gameState = "play1"; //When in game state start switch to state play 1)
