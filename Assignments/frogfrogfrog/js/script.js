@@ -22,8 +22,11 @@
  * - "Start" screen
  * - "Win" state if 5 flies are caught
  * - "Lose" state if 3 flies are missed
- * - Second stage which introduces a new fly type
- * - Green flies which are slightly faster than regular flies 
+ * - Display 
+ * - 3 stages with a different fly type for each (get to different stage based on point score)
+ * - Faster green flies in stage 2
+ * - Wavy purple flies using sine function 
+ * - Sound effect when a fly is caught 
  * 
  * 
  */
@@ -97,12 +100,15 @@ const purpleFly = {
 function setup() {
     createCanvas(640, 480);
 
+    //Load the sound effect
+    dingSound = loadSound('ding.wav');
+
     // Give the fly its first random position
     resetFly();
 }
 
 function draw() {
-    background("#063a4f");
+    background("#57b9ff");
 
     //Draw the Start Screen
     if (gameState === "start") {
@@ -279,7 +285,7 @@ function movePurpleFly() {
 function drawFly() {
     push();
     noStroke();
-    fill("#8aa9b5");
+    fill("#030b21");
     ellipse(fly.x, fly.y, fly.size);
     pop();
 }
@@ -290,7 +296,7 @@ function drawFly() {
 function drawGreenFly() {
     push();
     noStroke();
-    fill("#137d21");
+    fill("#12820e");
     ellipse(greenFly.x, greenFly.y, greenFly.size);
     pop();
 }
@@ -298,7 +304,7 @@ function drawGreenFly() {
 function drawPurpleFly() {
     push();
     noStroke();
-    fill("#c300ff");
+    fill("#601185");
     ellipse(purpleFly.x, purpleFly.y, purpleFly.size);
     pop();
 }
@@ -369,7 +375,7 @@ function moveTongue() {
 function drawFrog() {
     // Draw the tongue tip
     push();
-    fill("#a80707");
+    fill("#ff0000");
     noStroke();
     ellipse(frog.tongue.x, frog.tongue.y, frog.tongue.size);
     pop();
@@ -383,7 +389,7 @@ function drawFrog() {
 
     // Draw the frog's body
     push();
-    fill("#85c404");
+    fill("#4da151");
     noStroke();
     ellipse(frog.body.x, frog.body.y, frog.body.size);
     pop();
@@ -435,6 +441,10 @@ function checkTongueFlyOverlap(fly) {
             score += 1; // Add 1 point for regular fly
             resetFly(); // Reset the regular fly
         }
+
+        //Play the ding sound effect 
+        dingSound.play();
+
         // Bring back the tongue
         frog.tongue.state = "inbound";
     }
