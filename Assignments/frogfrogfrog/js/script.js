@@ -1,5 +1,5 @@
 /**
- * Froggy Feast
+ * FROGGY FEAST
  * Mars Lapierre-Furtado
  * 
  * A game of catching flies with your frog-tongue
@@ -8,7 +8,8 @@
  * - Move the frog with your mouse
  * - Click to launch the tongue
  * - Catch flies
- * - If you miss 3 dlies, game over!
+ * - If you miss 3 flies, game over!
+ * - Get 35 points to win! 
  * 
  * Made with p5
  * https://p5js.org/
@@ -26,7 +27,7 @@
  * - 3 stages with a different fly type for each (get to different stage based on point score)
  * - Faster green flies in stage 2
  * - Wavy purple flies using sine function 
- * - Sound effect when a fly is caught 
+ * - Ding sound effect when a fly is caught succesfully 
  * 
  * 
  */
