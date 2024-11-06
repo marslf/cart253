@@ -39,6 +39,8 @@ let gameState = "start" //States: "start" , "play1" , "play2" , "win" "lose"
 //Variable to count the missed flies
 let missedFlies = 0;
 
+let dingSound; // Declare at the top if it's a global variable
+
 // Our frog
 const frog = {
     // The frog's body has a position and size
@@ -101,10 +103,16 @@ function setup() {
     createCanvas(640, 480);
 
     //Load the sound effect
-    dingSound = loadSound('assets/sounds/ding.wav');
+    try {
+        dingSound = new Audio('assets/sounds/ding.wav');
+        dingSound.load(); // Preload the sound
+    } catch (error) {
+        console.error("Failed to load sound file:", error);
 
-    // Give the fly its first random position
-    resetFly();
+
+        // Give the fly its first random position
+        resetFly();
+    }
 }
 
 function draw() {
@@ -419,6 +427,12 @@ function drawMissedCount() {
     textAlign(LEFT, TOP);
     text(missedFlies + "/3", 20, 20);
     pop();
+}
+
+function playDingSound() {
+    if (dingSound) {
+        dingSound.play();
+    }
 }
 
 /**

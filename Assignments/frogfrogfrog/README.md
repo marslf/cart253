@@ -10,3 +10,4 @@ In this game, you play as a frog catching flies by launching its tongue. Progres
 ## Credits
 
 This project uses [p5.js](https://p5js.org).
+This project uses a ding sound effect which was sourced on FreeSound. The author of the sound file is Aiwha : https://freesound.org/people/Aiwha/sounds/196106/
