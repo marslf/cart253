@@ -104,15 +104,17 @@ function setup() {
 
     //Load the sound effect
     try {
-        dingSound = new Audio('assets/sounds/ding.wav');
+        dingSound = new Audio('./assets/sounds/ding.wav');
         dingSound.load(); // Preload the sound
     } catch (error) {
         console.error("Failed to load sound file:", error);
-
-
-        // Give the fly its first random position
-        resetFly();
+        dingSound = null; // Set to null if loading fails
     }
+
+    // Give the fly its first random position
+
+
+    resetFly();
 }
 
 function draw() {
@@ -456,11 +458,16 @@ function checkTongueFlyOverlap(fly) {
             resetFly(); // Reset the regular fly
         }
 
-        //Play the ding sound effect 
-        dingSound.play();
+        //Play the ding sound effect if successfully loaded 
+        if (dingSound) {
+            dingSound.currentTime = 0; // Reset the sound to start
+            dingSound.play().catch(error => {
+                console.error("Error playing sound:", error);
+            });
 
-        // Bring back the tongue
-        frog.tongue.state = "inbound";
+            // Bring back the tongue
+            frog.tongue.state = "inbound";
+        }
     }
 }
 
