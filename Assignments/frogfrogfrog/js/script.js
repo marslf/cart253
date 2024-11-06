@@ -88,7 +88,7 @@ function setup() {
 }
 
 function draw() {
-    background("#87ceeb");
+    background("#063a4f");
 
     //Draw the Start Screen
     if (gameState === "start") {
@@ -230,7 +230,7 @@ function moveGreenFly() {
 function drawFly() {
     push();
     noStroke();
-    fill("#000000");
+    fill("#8aa9b5");
     ellipse(fly.x, fly.y, fly.size);
     pop();
 }
@@ -241,7 +241,7 @@ function drawFly() {
 function drawGreenFly() {
     push();
     noStroke();
-    fill("#00ff00");
+    fill("#137d21");
     ellipse(greenFly.x, greenFly.y, greenFly.size);
     pop();
 }
@@ -303,7 +303,7 @@ function moveTongue() {
 function drawFrog() {
     // Draw the tongue tip
     push();
-    fill("#ff0000");
+    fill("#a80707");
     noStroke();
     ellipse(frog.tongue.x, frog.tongue.y, frog.tongue.size);
     pop();
@@ -317,7 +317,7 @@ function drawFrog() {
 
     // Draw the frog's body
     push();
-    fill("#00ff00");
+    fill("#85c404");
     noStroke();
     ellipse(frog.body.x, frog.body.y, frog.body.size);
     pop();
