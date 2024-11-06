@@ -57,7 +57,7 @@ const frog = {
 
 //The starting score
 let score = 0;
-const maxScore = 25; //Score to win the game 
+const maxScore = 35; //Score to win the game 
 
 // Regular fly
 // Has a position, size, and speed of horizontal movement
@@ -74,7 +74,21 @@ const greenFly = {
     y: 200, //will be random
     size: 10,
     speed: 5,
-    points: 3 //green flies will be worth 3 points instead of 1 
+    points: 2 //green flies will be worth 3 points instead of 1 
+};
+
+//Purple fly
+//Moves in a wave pattern
+const purpleFly = {
+    x: 0,
+    y: 200,
+    size: 12,
+    speed: 4,
+    amplitude: 80, //amplitude for sine wave motion
+    baseY: 200, //base Y position for wave movement
+    angle: 0, //angle for sine wave calculation
+    angleSpeed: 0.1, //how fast the angle changes
+    points: 3
 };
 
 /**
@@ -126,8 +140,8 @@ function draw() {
         drawMissedCount();
 
         //Check for win condition
-        if (score >= maxScore) {
-            gameState = "win";
+        if (score >= 20) {
+            gameState = "play3";
         }
 
         //Check for lose condition
@@ -136,10 +150,27 @@ function draw() {
         }
 
         // Draw the Win Screen
+    } else if (gameState === "play3") {
+        movePurpleFly();
+        drawPurpleFly();
+        moveFrog();
+        moveTongue();
+        drawFrog();
+        checkTongueFlyOverlap(purpleFly);
+        drawScore();
+        drawMissedCount();
+
+        if (score >= maxScore) {
+            gameState = "win";
+        }
+
+        if (missedFlies >= 3) {
+            gameState = "lose"
+        }
+
     } else if (gameState === "win") {
         drawWinScreen();
 
-        // Draw the Lose Screen
     } else if (gameState === "lose") {
         drawLoseScreen();
     }
@@ -225,6 +256,24 @@ function moveGreenFly() {
 }
 
 /**
+ * Moves the purple fly in a sine wave pattern
+ */
+function movePurpleFly() {
+    purpleFly.x += purpleFly.speed;
+    purpleFly.angle += purpleFly.angleSpeed;
+    purpleFly.y = purpleFly.baseY + sin(purpleFly.angle) * purpleFly.amplitude;
+
+    if (purpleFly.x > width) {
+        missedFlies++;
+        resetPurpleFly();
+
+        if (missedFlies >= 3) {
+            gameState = "lose";
+        }
+    }
+}
+
+/**
  * Draws the fly as a black circle
  */
 function drawFly() {
@@ -246,6 +295,14 @@ function drawGreenFly() {
     pop();
 }
 
+function drawPurpleFly() {
+    push();
+    noStroke();
+    fill("#c300ff");
+    ellipse(purpleFly.x, purpleFly.y, purpleFly.size);
+    pop();
+}
+
 /**
  * Resets the regular fly to the left with a random y
  */
@@ -260,6 +317,15 @@ function resetFly() {
 function resetGreenFly() {
     greenFly.x = 0;
     greenFly.y = random(0, 300);
+}
+
+/**
+ * Resets the purple fly to the left side with a random base Y position
+ */
+function resetPurpleFly() {
+    purpleFly.x = 0;
+    purpleFly.baseY = random(purpleFly.amplitude, height - purpleFly.amplitude);
+    purpleFly.angle = 0;
 }
 
 /**
@@ -360,8 +426,11 @@ function checkTongueFlyOverlap(fly) {
     if (eaten) {
         // Increase score based on fly type
         if (fly === greenFly) {
-            score += 3; // Add 3 points for green fly
+            score += 2; // Add 3 points for green fly
             resetGreenFly(); // Reset the green fly
+        } else if (fly === purpleFly) {
+            score += 3;
+            resetPurpleFly();
         } else {
             score += 1; // Add 1 point for regular fly
             resetFly(); // Reset the regular fly
@@ -384,7 +453,7 @@ function mousePressed() {
         missedFlies = 0; // Reset missed flies
         resetFly(); // Reset fly position
 
-    } else if (gameState === "play1" || gameState === "play2") { //When in game state play1 and play2 = Launch the tongue on click (if it's not launched yet)
+    } else if (gameState === "play1" || gameState === "play2" || gameState === "play3") { //When in game state play1 and play2 = Launch the tongue on click (if it's not launched yet)
         if (frog.tongue.state === "idle") {
             frog.tongue.state = "outbound";
         }
@@ -403,4 +472,5 @@ function resetGame() {
     gameState = "start"; // Set back to start state
     resetFly(); // Reset regular fly
     resetGreenFly(); // Reset green fly
+    resetPurpleFly(); //Reset purple fly 
 }
