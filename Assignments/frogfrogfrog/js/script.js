@@ -384,7 +384,7 @@ function mousePressed() {
         missedFlies = 0; // Reset missed flies
         resetFly(); // Reset fly position
 
-    } else if (gameState === "play1") { //When in game state play1 Launch the tongue on click (if it's not launched yet)
+    } else if (gameState === "play1" || gameState === "play2") { //When in game state play1 and play2 = Launch the tongue on click (if it's not launched yet)
         if (frog.tongue.state === "idle") {
             frog.tongue.state = "outbound";
         }
@@ -401,6 +401,6 @@ function resetGame() {
     score = 0;
     missedFlies = 0;
     gameState = "start"; // Set back to start state
-    resetRegularFly(); // Reset regular fly
+    resetFly(); // Reset regular fly
     resetGreenFly(); // Reset green fly
 }
