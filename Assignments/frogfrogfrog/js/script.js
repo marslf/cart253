@@ -101,7 +101,7 @@ function setup() {
     createCanvas(640, 480);
 
     //Load the sound effect
-    dingSound = loadSound('ding.wav');
+    dingSound = loadSound('assets/sounds/ding.wav');
 
     // Give the fly its first random position
     resetFly();
