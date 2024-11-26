@@ -1,8 +1,8 @@
 # Template p5 Project
 
-Author Name
+Mars Lapierre-Furtado
 
-[View this project online](URL_FOR_THE_RUNNING_PROJECT)
+[View this project online](https://marslf.github.io/cart253/Assignment/variationJam/)
 
 ## Description
 
