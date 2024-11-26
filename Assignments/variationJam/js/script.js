@@ -8,10 +8,11 @@
 "use strict";
 
 // Game variables
-let gameState = "default"; //Game States: "start", "default", "win"
+let gameState = "start"; //Game States: "start", "default", "win"
 let playerX, playerY; //Player movement/position
 let currentRoom = { x: 1, y: 1 }; //Room that the player is/starts in 
 let roomGrid = []; //World room grid
+let currentRoomData; // Initialized in setup()
 
 /**
  * SETUP DESCRIPTION
@@ -45,6 +46,10 @@ function setup() {
             roomGrid.push(room);
         }
     }
+
+    // Initialize currentRoomData
+    updateCurrentRoomData();
+
 }
 
 
@@ -63,44 +68,10 @@ function draw() {
     background(220);
 
     if (gameState === "default") {
-        // Draw the walls and doorways
-        fill(0);
-        rect(0, 0, width, 20); // Top wall
-        rect(0, height - 20, width, 20); // Bottom wall
-        rect(0, 0, 20, height); // Left wall
-        rect(width - 20, 0, 20, height); // Right wall
+        drawRooms
+        drawPlayer
 
-        // Draw the doorways
-        if (currentRoomData.exits.top) {
-            fill(255, 255, 0);
-            rect(width / 2 - 20, 0, 40, 20);
-        }
-        if (currentRoomData.exits.bottom) {
-            fill(255, 255, 0);
-            rect(width / 2 - 20, height - 20, 40, 20);
-        }
-        if (currentRoomData.exits.left) {
-            fill(255, 255, 0);
-            rect(0, height / 2 - 20, 20, 40);
-        }
-        if (currentRoomData.exits.right) {
-            fill(255, 20);
-            rect(width - 20, height / 2 - 20, 20, 40);
-        }
-
-
-        // Draw the current room
-        let currentRoomIndex = currentRoom.x + currentRoom.y * 3;
-        let currentRoomData = roomGrid[currentRoomIndex];
-        fill(currentRoomData.color);
-        rect(0, 0, width, height);
-
-        // Draw the player
-        fill(255, 0, 0);
-        rect(playerX, playerY, 20, 20);
-
-        // Handle player movement
-        handlePlayerMovement();
+        handlePlayerMovement(); // Handle player movement
     }
 }
 
@@ -113,22 +84,22 @@ function draw() {
 */
 function handlePlayerMovement() {
     // Move the player based on WASD input
-    if (keyIsDown('W')) { // W
+    if (keyIsDown(87)) { // W
         if (currentRoomData.exits.top) {
             playerY -= 2;
         }
     }
-    if (keyIsDown('S')) { // S
+    if (keyIsDown(83)) { // S
         if (currentRoomData.exits.bottom) {
             playerY += 2;
         }
     }
-    if (keyIsDown('A')) { // A
+    if (keyIsDown(65)) { // A
         if (currentRoomData.exits.left) {
             playerX -= 2;
         }
     }
-    if (keyIsDown('D')) { // D
+    if (keyIsDown(68)) { // D
         if (currentRoomData.exits.right) {
             playerX += 2;
         }
@@ -139,6 +110,7 @@ function handlePlayerMovement() {
         if (currentRoomData.exits.left) {
             currentRoom.x--;
             playerX = width - 20;
+            updateCurrentRoomData();
         } else {
             playerX = 20;
         }
@@ -146,6 +118,7 @@ function handlePlayerMovement() {
         if (currentRoomData.exits.right) {
             currentRoom.x++;
             playerX = 20;
+            updateCurrentRoomData();
         } else {
             playerX = width - 20;
         }
@@ -153,6 +126,7 @@ function handlePlayerMovement() {
         if (currentRoomData.exits.top) {
             currentRoom.y--;
             playerY = height - 20;
+            updateCurrentRoomData();
         } else {
             playerY = 20;
         }
@@ -160,6 +134,7 @@ function handlePlayerMovement() {
         if (currentRoomData.exits.bottom) {
             currentRoom.y++;
             playerY = 20;
+            updateCurrentRoomData();
         } else {
             playerY = height - 20;
         }
@@ -167,7 +142,7 @@ function handlePlayerMovement() {
 }
 
 /**
- * START SCREEN
+ * DRAW START SCREEN FUNCTION
  */
 function drawStartScreen() {
     push();
@@ -180,9 +155,60 @@ function drawStartScreen() {
     pop();
 };
 
+
+/**
+ * DRAW ROOMS FUNCTION
+ */
+function drawRooms() {
+    // Draw the walls and doorways
+    fill(0);
+    rect(0, 0, width, 20); // Top wall
+    rect(0, height - 20, width, 20); // Bottom wall
+    rect(0, 0, 20, height); // Left wall
+    rect(width - 20, 0, 20, height); // Right wall
+
+    // Draw the doorways
+    if (currentRoomData.exits.top) {
+        fill(255, 255, 0);
+        rect(width / 2 - 20, 0, 40, 20);
+    }
+    if (currentRoomData.exits.bottom) {
+        fill(255, 255, 0);
+        rect(width / 2 - 20, height - 20, 40, 20);
+    }
+    if (currentRoomData.exits.left) {
+        fill(255, 255, 0);
+        rect(0, height / 2 - 20, 20, 40);
+    }
+    if (currentRoomData.exits.right) {
+        fill(255, 255, 0);
+        rect(width - 20, height / 2 - 20, 20, 40);
+    }
+
+    // Draw the current room
+    fill(currentRoomData.color);
+    rect(20, 20, width - 40, height - 40);
+}
+
+
+/**
+ * DRAW PLAYER FUNCTION
+ */
+function drawPlayer() {
+    fill(255, 0, 0);
+    rect(playerX, playerY, 20, 20);
+}
+
+
 //MOUSE PRESSED FUNCTION
 function mousePressed() {
     if (gameState === "start") {
         gameState = "default"; //When in game state start switch to state play 1)
     };
 };
+
+
+function updateCurrentRoomData() {
+    let currentRoomIndex = currentRoom.x + currentRoom.y * 3;
+    currentRoomData = roomGrid[currentRoomIndex];
+}
