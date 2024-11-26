@@ -72,6 +72,8 @@ function draw() {
         drawPlayer
 
         handlePlayerMovement(); // Handle player movement
+    } else if (gameState === "start") {
+        drawStartScreen();
     }
 }
 
@@ -190,15 +192,13 @@ function drawRooms() {
     rect(20, 20, width - 40, height - 40);
 }
 
-
 /**
  * DRAW PLAYER FUNCTION
  */
 function drawPlayer() {
-    fill(255, 0, 0);
+    fill(0, 200, 50);
     rect(playerX, playerY, 20, 20);
 }
-
 
 //MOUSE PRESSED FUNCTION
 function mousePressed() {
