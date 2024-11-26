@@ -3,212 +3,227 @@
  * Mars Lapierre-Furtado
  * 
  * PROJECT DESCRIPTION
+ * 
  */
 
 "use strict";
 
+// Game states
+let gameState = "start"; // States: "start", "play", "lose"
+
+// Player (bird)
+const bird = {
+    x: 100,
+    y: 200,
+    size: 30,
+    velocity: 0,
+    gravity: 0.6,
+    jumpStrength: -10
+};
+
+// Obstacles (pipes)
+const pipes = {
+    width: 50,
+    speed: 3,
+    gap: 150, // Space between top and bottom pipes
+    list: []
+};
+
 // Game variables
-let gameState = "start"; //Game States: "start", "default", "win"
-let playerX, playerY; //Player movement/position
-let currentRoom = { x: 1, y: 1 }; //Room that the player is/starts in 
-let roomGrid = []; //World room grid
-let currentRoomData; // Initialized in setup()
+let score = 0;
 
 /**
- * SETUP DESCRIPTION
- * 
- * -create canvas 
- * -player starts in the middle
- * -create room grid
- * 
-*/
+ * Setup function to initialize the game
+ */
 function setup() {
-    createCanvas(600, 600);
-
-    // Initialize player position
-    playerX = width / 2;
-    playerY = height / 2;
-
-    // Create the room grid
-    for (let x = 0; x < 3; x++) {
-        for (let y = 0; y < 3; y++) {
-            let room = {
-                x: x,
-                y: y,
-                color: color(random(255), random(255), random(255)),
-                exits: {
-                    top: y > 0,
-                    bottom: y < 2,
-                    left: x > 0,
-                    right: x < 2
-                }
-            };
-            roomGrid.push(room);
-        }
-    }
-
-    // Initialize currentRoomData
-    updateCurrentRoomData();
-
+    createCanvas(400, 600);
+    resetGame();
 }
 
-
-
 /**
- * DRAW DESCRIPTION
- * 
- * -create the room the player is in
- * -create the player
- * -move the player with WASD input
- * 
- * 
-*/
+ * Main draw loop
+ */
 function draw() {
-    // Clear the canvas
-    background(220);
+    background("#87CEEB"); // Sky blue background
 
-    if (gameState === "default") {
-        drawRooms
-        drawPlayer
-
-        handlePlayerMovement(); // Handle player movement
-    } else if (gameState === "start") {
+    if (gameState === "start") {
         drawStartScreen();
+    } else if (gameState === "play") {
+        moveBird();
+        movePipes();
+        drawBird();
+        drawPipes();
+        drawScore();
+        checkCollisions();
+    } else if (gameState === "lose") {
+        drawLoseScreen();
     }
 }
 
+/**
+ * Move the bird with gravity and update its position
+ */
+function moveBird() {
+    // Apply gravity
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    // Prevent bird from going off the bottom or top of the screen
+    bird.y = constrain(bird.y, 0, height);
+}
 
 /**
- * PLAYER MOVEMENT
- * 
- * -
- * 
-*/
-function handlePlayerMovement() {
-    // Move the player based on WASD input
-    if (keyIsDown(87)) { // W
-        if (currentRoomData.exits.top) {
-            playerY -= 2;
-        }
-    }
-    if (keyIsDown(83)) { // S
-        if (currentRoomData.exits.bottom) {
-            playerY += 2;
-        }
-    }
-    if (keyIsDown(65)) { // A
-        if (currentRoomData.exits.left) {
-            playerX -= 2;
-        }
-    }
-    if (keyIsDown(68)) { // D
-        if (currentRoomData.exits.right) {
-            playerX += 2;
-        }
+ * Create and move pipes across the screen
+ */
+function movePipes() {
+    // Add new pipes periodically
+    if (frameCount % 100 === 0) {
+        createPipe();
     }
 
-    // Check if the player has crossed a room boundary
-    if (playerX < 20) {
-        if (currentRoomData.exits.left) {
-            currentRoom.x--;
-            playerX = width - 20;
-            updateCurrentRoomData();
-        } else {
-            playerX = 20;
-        }
-    } else if (playerX > width - 20) {
-        if (currentRoomData.exits.right) {
-            currentRoom.x++;
-            playerX = 20;
-            updateCurrentRoomData();
-        } else {
-            playerX = width - 20;
-        }
-    } else if (playerY < 20) {
-        if (currentRoomData.exits.top) {
-            currentRoom.y--;
-            playerY = height - 20;
-            updateCurrentRoomData();
-        } else {
-            playerY = 20;
-        }
-    } else if (playerY > height - 20) {
-        if (currentRoomData.exits.bottom) {
-            currentRoom.y++;
-            playerY = 20;
-            updateCurrentRoomData();
-        } else {
-            playerY = height - 20;
+    // Move existing pipes
+    for (let i = pipes.list.length - 1; i >= 0; i--) {
+        pipes.list[i].x -= pipes.speed;
+
+        // Remove pipes that are off the screen
+        if (pipes.list[i].x < -pipes.width) {
+            pipes.list.splice(i, 1);
         }
     }
 }
 
 /**
- * DRAW START SCREEN FUNCTION
+ * Create a new set of pipes with a random gap position
+ */
+function createPipe() {
+    const gapY = random(100, height - 100 - pipes.gap);
+    pipes.list.push({
+        x: width,
+        topHeight: gapY,
+        bottomHeight: height - (gapY + pipes.gap)
+    });
+}
+
+/**
+ * Draw the bird
+ */
+function drawBird() {
+    push();
+    fill("#FFD700"); // Gold color
+    noStroke();
+    ellipse(bird.x, bird.y, bird.size);
+    pop();
+}
+
+/**
+ * Draw the pipes
+ */
+function drawPipes() {
+    push();
+    fill("#228B22"); // Green color
+    for (let pipe of pipes.list) {
+        // Top pipe
+        rect(pipe.x, 0, pipes.width, pipe.topHeight);
+        // Bottom pipe
+        rect(pipe.x, height - pipe.bottomHeight, pipes.width, pipe.bottomHeight);
+    }
+    pop();
+}
+
+/**
+ * Check for collisions with pipes or screen edges
+ */
+function checkCollisions() {
+    // Check bottom and top screen boundaries
+    if (bird.y >= height || bird.y <= 0) {
+        gameState = "lose";
+    }
+
+    // Check pipe collisions
+    for (let pipe of pipes.list) {
+        // Check if bird is within pipe's horizontal range
+        if (bird.x + bird.size / 2 > pipe.x && bird.x - bird.size / 2 < pipe.x + pipes.width) {
+            // Check top pipe collision
+            if (bird.y - bird.size / 2 < pipe.topHeight) {
+                gameState = "lose";
+            }
+            // Check bottom pipe collision
+            if (bird.y + bird.size / 2 > height - pipe.bottomHeight) {
+                gameState = "lose";
+            }
+        }
+
+        // Score point when passing pipe
+        if (pipe.x + pipes.width < bird.x && !pipe.scored) {
+            score++;
+            pipe.scored = true;
+        }
+    }
+}
+
+/**
+ * Display the score
+ */
+function drawScore() {
+    push();
+    fill(255);
+    noStroke();
+    textSize(32);
+    textAlign(RIGHT, TOP);
+    text(score, width - 20, 20);
+    pop();
+}
+
+/**
+ * Draw the start screen
  */
 function drawStartScreen() {
     push();
     textAlign(CENTER, CENTER);
     textSize(34);
     fill(255);
-    text("Game Title", width / 2, height / 2 - 50);
+    text("Flappy Bird", width / 2, height / 2 - 50);
     textSize(24);
     text("Click to Start", width / 2, height / 2);
     pop();
-};
-
-
-/**
- * DRAW ROOMS FUNCTION
- */
-function drawRooms() {
-    // Draw the walls and doorways
-    fill(0);
-    rect(0, 0, width, 20); // Top wall
-    rect(0, height - 20, width, 20); // Bottom wall
-    rect(0, 0, 20, height); // Left wall
-    rect(width - 20, 0, 20, height); // Right wall
-
-    // Draw the doorways
-    if (currentRoomData.exits.top) {
-        fill(255, 255, 0);
-        rect(width / 2 - 20, 0, 40, 20);
-    }
-    if (currentRoomData.exits.bottom) {
-        fill(255, 255, 0);
-        rect(width / 2 - 20, height - 20, 40, 20);
-    }
-    if (currentRoomData.exits.left) {
-        fill(255, 255, 0);
-        rect(0, height / 2 - 20, 20, 40);
-    }
-    if (currentRoomData.exits.right) {
-        fill(255, 255, 0);
-        rect(width - 20, height / 2 - 20, 20, 40);
-    }
-
-    // Draw the current room
-    fill(currentRoomData.color);
-    rect(20, 20, width - 40, height - 40);
 }
 
 /**
- * DRAW PLAYER FUNCTION
+ * Draw the lose screen
  */
-function drawPlayer() {
-    fill(0, 200, 50);
-    rect(playerX, playerY, 20, 20);
+function drawLoseScreen() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("Game Over!", width / 2, height / 2 - 50);
+    textSize(24);
+    text("Score: " + score, width / 2, height / 2);
+    text("Click to Restart", width / 2, height / 2 + 50);
+    pop();
 }
 
-//MOUSE PRESSED FUNCTION
+/**
+ * Handle mouse/key input
+ */
 function mousePressed() {
     if (gameState === "start") {
-        gameState = "default"; //When in game state start switch to state play 1)
-    };
-};
+        gameState = "play";
+    } else if (gameState === "play") {
+        // Make the bird jump
+        bird.velocity = bird.jumpStrength;
+    } else if (gameState === "lose") {
+        resetGame();
+    }
+}
 
-
-function updateCurrentRoomData() {
-    let currentRoomIndex = currentRoom.x + currentRoom.y * 3;
-    currentRoomData = roomGrid[currentRoomIndex];
+/**
+ * Reset the game to initial state
+ */
+function resetGame() {
+    bird.y = height / 2;
+    bird.velocity = 0;
+    pipes.list = [];
+    score = 0;
+    gameState = "start";
 }
