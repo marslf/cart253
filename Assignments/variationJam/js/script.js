@@ -9,7 +9,7 @@
 "use strict";
 
 // Game states
-let gameState = "start"; // States: "start", "play", "lose"
+let gameState = "start"; // States: "start", "menu", "play", "lose"
 
 // Player (bird)
 const bird = {
@@ -189,6 +189,22 @@ function drawStartScreen() {
 }
 
 /**
+ * Draw the menu screen
+ */
+function drawMenuScreen() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(34);
+    fill(255);
+    text("Flappy Bird", width / 2, height / 2 - 50);
+    textSize(24);
+    text("(1) Flappy Bird", width / 2, height / 2 - 40);
+    text("(2) Gravity Bird", width / 2, height / 2);
+    text("(3) Time Bird", width / 2, height / 2 + 40);
+    pop();
+}
+
+/**
  * Draw the lose screen
  */
 function drawLoseScreen() {
@@ -208,7 +224,7 @@ function drawLoseScreen() {
  */
 function mousePressed() {
     if (gameState === "start") {
-        gameState = "play";
+        gameState = "menu";
     } else if (gameState === "play") {
         // Make the bird jump
         bird.velocity = bird.jumpStrength;
