@@ -198,9 +198,9 @@ function drawMenuScreen() {
     fill(255);
     text("Flappy Bird", width / 2, height / 2 - 50);
     textSize(24);
-    text("(1) Flappy Bird", width / 2, height / 2 - 40);
-    text("(2) Gravity Bird", width / 2, height / 2);
-    text("(3) Time Bird", width / 2, height / 2 + 40);
+    text("(0) Flappy Bird", width / 2, height / 2 - 40);
+    text("(1) Gravity Bird", width / 2, height / 2);
+    text("(2) Time Bird", width / 2, height / 2 + 40);
     pop();
 }
 
@@ -243,3 +243,12 @@ function resetGame() {
     score = 0;
     gameState = "start";
 }
+
+/**
+ * Click Esc to return to menu 
+ */
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        gameState = "menu";
+    }
+});
