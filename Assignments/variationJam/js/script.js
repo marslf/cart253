@@ -9,7 +9,7 @@
 "use strict";
 
 // Game states
-let gameState = "start"; // States: "start", "menu", "flappyBird", "gravityBird", "doubleBird", "lose"
+let gameState = "menu"; // States: "menu", "flappyBird", "gravityBird", "wavyBird", "lose"
 
 // Player (bird)
 const bird = {
@@ -43,18 +43,17 @@ function setup() {
 /**
  * Main draw loop
  * 
- * draw the start screen
  * draw the menu screen
- * draw the flappyBird (default mode) screen
+ * draw the flappyBird (default mode)
+ * draw the GravityBird
+ * draw WavyBird
  * draw the lose screen
  * 
  */
 function draw() {
     background("#87CEEB"); // Sky blue background
 
-    if (gameState === "start") {
-        drawStartScreen();
-    } else if (gameState === "menu") {
+    if (gameState === "menu") {
         drawMenuScreen();
     } else if (gameState === "flappyBird") {
         moveBird();
@@ -70,8 +69,14 @@ function draw() {
         drawPipes();
         drawScore();
         checkGravityBirdCollisions();
-    }
-    else if (gameState === "lose") {
+    } else if (gameState === "wavyBird") {
+        moveBird();
+        moveWavyPipes(); //Wavy pipe function
+        drawBird();
+        drawPipes();
+        drawScore();
+        checkCollisions();
+    } else if (gameState === "lose") {
         drawLoseScreen();
     }
 }
@@ -253,6 +258,48 @@ function checkGravityBirdCollisions() {
 }
 
 
+/**
+ * WAVY BIRD SPECIFIC FUNCTIONS
+ */
+
+//Moving Pipes function
+function moveWavyPipes() {
+    // Add new pipes periodically
+    if (frameCount % 100 === 0) {
+        createPipe();
+    }
+
+    // Move existing pipes
+    for (let i = pipes.list.length - 1; i >= 0; i--) {
+        pipes.list[i].x -= pipes.speed; // Horizontal movement
+
+        // Vertical movement (modification) 
+        if (!pipes.list[i].verticalSpeed) {
+            pipes.list[i].verticalSpeed = random(-1, 1); // Initialize random vertical speed when pipe is created
+        }
+
+        // Move both top and bottom pipes together while maintaining gap
+        pipes.list[i].topHeight += pipes.list[i].verticalSpeed;
+        pipes.list[i].bottomHeight = height - (pipes.list[i].topHeight + pipes.gap);
+
+        if (pipes.list[i].topHeight < 50 || pipes.list[i].topHeight > height - 230) { // Ensure there's always enough space to pass through
+            pipes.list[i].verticalSpeed *= -1;
+        }
+
+        // Remove pipes that are off the screen
+        if (pipes.list[i].x < -pipes.width) {
+            pipes.list.splice(i, 1);
+        }
+    }
+}
+
+
+
+
+/**
+ * OTHER FUNCTIONS
+ */
+
 
 /**
  * Display the score
@@ -267,20 +314,6 @@ function drawScore() {
     pop();
 }
 
-/**
- * Draw the start screen
- */
-function drawStartScreen() {
-    push();
-    textAlign(CENTER, CENTER);
-    textSize(34);
-    fill(255);
-    text("Flappy Bird", width / 2, height / 2 - 50);
-    textSize(24);
-    //text("Click to Start", width / 2, height / 2);
-    text("Click to FLY!", width / 2, height / 1.5);
-    pop();
-}
 
 /**
  * Draw the menu screen
@@ -290,11 +323,13 @@ function drawMenuScreen() {
     textAlign(CENTER, CENTER);
     textSize(34);
     fill(255);
-    text("Flappy Bird", width / 2, height / 2 - 150);
+    text("BIRD", width / 2, height / 2 - 150);
     textSize(24);
     text("(0) Flappy Bird", width / 2, height / 2 - 40);
     text("(1) Gravity Bird", width / 2, height / 2);
-    text("(2) Time Bird", width / 2, height / 2 + 40);
+    text("(2) Wavy Bird", width / 2, height / 2 + 40);
+    text("(3) Wavy Bird", width / 2, height / 2 + 80);
+    text("Click to FLY!", width / 2, height / 1.2);
     pop();
 }
 
@@ -309,7 +344,7 @@ function drawLoseScreen() {
     text("Game Over!", width / 2, height / 2 - 50);
     textSize(24);
     text("Score: " + score, width / 2, height / 2);
-    text("Click to Restart", width / 2, height / 2 + 50);
+    text("Click to return to menu", width / 2, height / 2 + 50);
     pop();
 }
 
@@ -317,15 +352,11 @@ function drawLoseScreen() {
  * Handle mouse/key input depending on the game state
  */
 function mousePressed() {
-    if (gameState === "start") {
-        gameState = "menu";
-    } else if (gameState === "flappyBird" || gameState === "doubleBird") {
+    if (gameState === "flappyBird" || gameState === "wavyBird") { //regular mousePressed output
         bird.velocity = bird.jumpStrength;
     } else if (gameState === "gravityBird") {
-        // Reverse gravity direction
-        bird.gravityDirection *= -1;
-        // Add a small velocity change to make direction change more responsive
-        bird.velocity = bird.jumpStrength * bird.gravityDirection;
+        bird.gravityDirection *= -1; // Reverse gravity direction
+        bird.velocity = bird.jumpStrength * bird.gravityDirection; // Add a small velocity change to make direction change more responsive
     } else if (gameState === "lose") {
         resetGame();
     }
@@ -341,7 +372,7 @@ function keyPressed() {
         } else if (key === '1') {
             gameState = "gravityBird";
         } else if (key === '2') {
-            gameState = "doubleBird";
+            gameState = "wavyBird";
         }
     }
 }
@@ -356,14 +387,7 @@ function resetGame() {
     bird.gravityDirection = 1; // Reset gravity direction to downward
     pipes.list = [];
     score = 0;
-    gameState = "start";
+    gameState = "menu";
 }
 
-/**
- * Click Esc to return to menu 
- */
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-        gameState = "menu";
-    }
-});
+
