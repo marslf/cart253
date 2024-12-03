@@ -9,7 +9,7 @@
 "use strict";
 
 // Game states
-let gameState = "menu"; // States: "menu", "flappyBird", "gravityBird", "wavyBird", "lose"
+let gameState = "menu"; // States: "menu", "flappyBird", "gravityBird", "wavyBird", "progressBird" "lose"
 
 // Player (bird)
 const bird = {
@@ -25,15 +25,42 @@ const bird = {
 const pipes = {
     width: 50,
     speed: 3,
-    gap: 180, // Space between top and bottom pipes
+    gap: 180, // Space between top and bottom pipes (default)
     list: []
 };
 
 // Game variables
 let score = 0;
 
+
+// PROGRESS BIRD: Difficulty Progression Configuration
+const difficultyProgression = {
+    // Array of difficulty stages
+    stages: [
+        { minScore: 0, maxScore: 10, gapSize: 180 },  // Initial easy stage
+        { minScore: 10, maxScore: 20, gapSize: 160 },  // Slightly smaller gap
+        { minScore: 20, maxScore: 30, gapSize: 140 },  // Narrower gap
+        { minScore: 30, maxScore: 40, gapSize: 120 },  // Very narrow gap
+        { minScore: 40, maxScore: 50, gapSize: 100 },  // Extremely challenging
+        { minScore: 50, maxScore: Infinity, gapSize: 80 }  // Maximum difficulty
+    ],
+
+    // Getcurrent difficulty stage = loop to find the appropriate difficulty stage
+    getCurrentStage(currentScore) {
+        for (let stage of this.stages) {
+            if (currentScore >= stage.minScore && currentScore < stage.maxScore) {
+                return stage;
+            }
+        }
+        // Default to the last stage if no matching stage found
+        return this.stages[this.stages.length - 1];
+    }
+};
+
+
+
 /**
- * Setup function to initialize the game
+ * SETUP function to initialize the game
  */
 function setup() {
     createCanvas(400, 600);
@@ -69,6 +96,14 @@ function draw() {
         drawPipes();
         drawScore();
         checkGravityBirdCollisions();
+    } else if (gameState === "progressBird") {
+        moveBird();
+        movePipes();
+        drawBird();
+        drawPipes();
+        drawScore();
+        drawDifficultyIndicator(); // New difficulty visualization
+        checkCollisions();
     } else if (gameState === "wavyBird") {
         moveBird();
         moveWavyPipes(); //Wavy pipe function
@@ -114,14 +149,17 @@ function movePipes() {
 }
 
 /**
- * Create a new set of pipes with a random gap position
+ * Create a new set of pipes with gap size according to difficulty stage and random gap position 
  */
 function createPipe() {
-    const gapY = random(100, height - 100 - pipes.gap);
+    const currentStage = difficultyProgression.getCurrentStage(score); //current difficulty stage based on score 
+    const gapSize = currentStage.gapSize; //use gap size based on stage 
+    const gapY = random(100, height - 100 - pipes.gap); //randomize gap position but keep correct gap size 
     pipes.list.push({
         x: width,
         topHeight: gapY,
-        bottomHeight: height - (gapY + pipes.gap)
+        bottomHeight: height - (gapY + pipes.gap),
+        currentStage: currentStage //attach stage info to pipe
     });
 }
 
@@ -294,16 +332,37 @@ function moveWavyPipes() {
 }
 
 
+/**
+ * PROGRESS BIRD
+ */
+
+//Visual indicator of current difficulty stage
+function drawDifficultyIndicator() {
+    push();
+    const currentStage = difficultyProgression.getCurrentStage(score);
+
+    // Color intensity increases with difficulty
+    const difficultyColor = lerpColor(
+        color(0, 255, 0),  // Green (easy)
+        color(255, 0, 0),  // Red (hard)
+        map(currentStage.gapSize, 180, 80, 0, 1)
+    );
+
+    fill(difficultyColor);
+    noStroke();
+    textSize(16);
+    textAlign(LEFT, TOP);
+    text(`Difficulty: ${currentStage.gapSize}px gap`, 10, 10);
+    pop();
+}
+
 
 
 /**
- * OTHER FUNCTIONS
+ * OTHER GENERAL FUNCTIONS FUNCTIONS
  */
 
-
-/**
- * Display the score
- */
+//Display the score
 function drawScore() {
     push();
     fill(255);
@@ -315,9 +374,8 @@ function drawScore() {
 }
 
 
-/**
- * Draw the menu screen
- */
+
+//Draw the menu screen
 function drawMenuScreen() {
     push();
     textAlign(CENTER, CENTER);
@@ -328,14 +386,13 @@ function drawMenuScreen() {
     text("(0) Flappy Bird", width / 2, height / 2 - 40);
     text("(1) Gravity Bird", width / 2, height / 2);
     text("(2) Wavy Bird", width / 2, height / 2 + 40);
-    text("(3) Wavy Bird", width / 2, height / 2 + 80);
+    text("(3) Progress Bird", width / 2, height / 2 + 80);
     text("Click to FLY!", width / 2, height / 1.2);
     pop();
 }
 
-/**
- * Draw the lose screen
- */
+
+//Draw the lose screen
 function drawLoseScreen() {
     push();
     textAlign(CENTER, CENTER);
@@ -348,11 +405,10 @@ function drawLoseScreen() {
     pop();
 }
 
-/**
- * Handle mouse/key input depending on the game state
- */
+
+//Handle mouse/key input depending on the game state
 function mousePressed() {
-    if (gameState === "flappyBird" || gameState === "wavyBird") { //regular mousePressed output
+    if (gameState === "flappyBird" || gameState === "wavyBird" || gameState === "progressBird") { //regular mousePressed output
         bird.velocity = bird.jumpStrength;
     } else if (gameState === "gravityBird") {
         bird.gravityDirection *= -1; // Reverse gravity direction
@@ -362,9 +418,8 @@ function mousePressed() {
     }
 }
 
-/**
- * Handle different game mode state changes
- */
+
+//Handle different game mode state changes
 function keyPressed() {
     if (gameState === "menu") {
         if (key === '0') {
@@ -373,14 +428,15 @@ function keyPressed() {
             gameState = "gravityBird";
         } else if (key === '2') {
             gameState = "wavyBird";
+        } else if (key === '3') {
+            gameState = "progressBird"
         }
     }
 }
 
 
-/**
- * Reset the game to initial state
- */
+
+//Reset the game to initial state
 function resetGame() {
     bird.y = height / 2;
     bird.velocity = 0;
