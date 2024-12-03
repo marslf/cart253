@@ -125,7 +125,7 @@ function draw() {
         moveFallingBird(); //Falling bird movement
         moveRisingPipes(); //Falling pipe function
         drawBird();
-        drawPipes();
+        drawFallingPipes();
         drawScore();
         checkFallingBirdCollisions();
     } else if (gameState === "lose") {
@@ -382,11 +382,10 @@ function drawDifficultyIndicator() {
 
 //Falling bird movement
 function moveFallingBird() {
-    // Constant downward movement
-    bird.velocity += bird.gravity;
-    bird.y += bird.velocity;
+    // Keep bird fixed vertically
+    bird.y = height / 3;
 
-    // Keep bird on screen horizontally
+    // Only allow horizontal movement but keep bird on screen 
     bird.x = constrain(bird.x, 0, width);
 }
 
@@ -414,17 +413,13 @@ function createRisingPipe() {
     pipes.list.push({
         y: height,
         x: gapX,
-        height: 50 // Pipe height
+        height: 50, // Pipe height
+        scored: false
     });
 }
 
 // Collision detection for Falling Bird
 function checkFallingBirdCollisions() {
-    // Check bottom and top screen boundaries
-    if (bird.y >= height || bird.y <= 0) {
-        gameState = "lose";
-    }
-
     // Check pipe collisions
     for (let pipe of pipes.list) {
         // Check if bird is within pipe's horizontal range
@@ -432,17 +427,26 @@ function checkFallingBirdCollisions() {
             bird.x - bird.size / 2 < pipe.x + pipes.width) {
 
             // Check collision with pipe
-            if (bird.y + bird.size / 2 > pipe.y) {
+            if (pipe.y < bird.y + bird.size / 2 && pipe.y + pipe.height > bird.y - bird.size / 2) {
                 gameState = "lose";
             }
         }
 
         // Score point when passing pipe
-        if (pipe.y + pipe.height < bird.y && !pipe.scored) {
+        if (pipe.y + pipe.height < height / 2 && !pipe.scored) {
             score++;
             pipe.scored = true;
         }
     }
+}
+
+function drawFallingPipes() {
+    push();
+    fill("#228B22"); // Green color
+    for (let pipe of pipes.list) {
+        rect(pipe.x, pipe.y, pipes.width, pipe.height);
+    }
+    pop();
 }
 
 
@@ -476,6 +480,7 @@ function drawMenuScreen() {
     text("(1) Gravity Bird", width / 2, height / 2);
     text("(2) Wavy Bird", width / 2, height / 2 + 40);
     text("(3) Progress Bird", width / 2, height / 2 + 80);
+    text("(4) Falling Bird", width / 2, height / 2 + 120);
     text("Click to FLY!", width / 2, height / 1.2);
     pop();
 }
@@ -560,15 +565,17 @@ function keyPressed() {
 
 
 
-//Reset the game to initial state
+//RESET the game to default state
 function resetGame() {
     bird.y = height / 2;
     bird.velocity = 0;
     bird.gravityDirection = 1; // Reset gravity direction to downward
     pipes.list = [];
     score = 0;
+    bird.x = width / 2; //center bird horizontally 
     gameState = "menu";
 }
+
 
 /**
  * INTRO SCREENS
