@@ -57,6 +57,13 @@ const difficultyProgression = {
     }
 };
 
+// Coins configuration
+const coins = {
+    size: 15,
+    speed: 3,
+    list: []
+};
+
 
 
 /**
@@ -80,11 +87,11 @@ function setup() {
 function draw() {
     background("#87CEEB"); // Sky blue background
 
-    if (gameState === "menu") {
+    if (gameState === "menu") { //MENU
         drawMenuScreen();
     } else if (gameState === "flappyBirdIntro") {
         drawFlappyBirdIntro();
-    } else if (gameState === "flappyBird") {
+    } else if (gameState === "flappyBird") { //FLAPPY BIRD (default)
         moveBird();
         movePipes();
         drawBird();
@@ -93,7 +100,7 @@ function draw() {
         checkCollisions();
     } else if (gameState === "gravityBirdIntro") {
         drawGravityBirdIntro();
-    } else if (gameState === "gravityBird") { //similar to regular game mode but with gravity=specific mechanics
+    } else if (gameState === "gravityBird") { //GRAVITY BIRD
         moveBirdWithReversedGravity();
         movePipes();
         drawBirdWithDirectionIndicator();
@@ -102,7 +109,7 @@ function draw() {
         checkGravityBirdCollisions();
     } else if (gameState === "wavyBirdIntro") {
         drawWavyBirdIntro();
-    } else if (gameState === "wavyBird") {
+    } else if (gameState === "wavyBird") { //WAVY BIRD
         moveBird();
         moveWavyPipes(); //Wavy pipe function
         drawBird();
@@ -111,7 +118,7 @@ function draw() {
         checkCollisions();
     } else if (gameState === "progressBirdIntro") {
         drawProgressBirdIntro();
-    } else if (gameState === "progressBird") {
+    } else if (gameState === "progressBird") { //PROGRESS BIRD
         moveBird();
         movePipes();
         drawBird();
@@ -121,13 +128,23 @@ function draw() {
         checkCollisions();
     } else if (gameState === "fallingBirdIntro") {
         drawFallingBirdIntro();
-    } else if (gameState === "fallingBird") {
+    } else if (gameState === "fallingBird") { //FALLING BIRD
         moveFallingBird(); // Falling Bird movement
         moveFallingPipes(); // Falling Pipe movement
         drawBird();
         drawFallingPipes(); // Draw the falling pipes
         drawScore();
         checkFallingBirdCollisions(); // Check for falling bird collisions
+    } else if (gameState === "coinBirdIntro") {
+        drawCoinBirdIntro();
+    } else if (gameState === "coinBird") { //GOLD BIRD
+        moveBird();
+        movePipesAndCoins();
+        drawBird();
+        drawPipes();
+        drawCoins();
+        drawScore();
+        checkCollisionsWithCoins();
     } else if (gameState === "lose") {
         drawLoseScreen();
     }
@@ -384,10 +401,10 @@ function drawDifficultyIndicator() {
 function moveFallingBird() {
     // Smooth horizontal movement
     if (keyIsDown(LEFT_ARROW)) {
-        bird.x -= 5;
+        bird.x -= 3;
     }
     if (keyIsDown(RIGHT_ARROW)) {
-        bird.x += 5;
+        bird.x += 3;
     }
 
     // Keep bird fixed vertically
@@ -414,7 +431,6 @@ function moveFallingPipes() {
     }
 }
 
-
 // Create horizontal pipes
 function createFallingPipe() {
     const pipeX = random(50, width - pipes.gap - 50); // Random x position within screen bounds
@@ -426,7 +442,6 @@ function createFallingPipe() {
         scored: false
     });
 }
-
 
 // Collision detection for Falling Bird
 function checkFallingBirdCollisions() {
@@ -454,7 +469,6 @@ function checkFallingBirdCollisions() {
     }
 }
 
-
 // Draw horizontal pipes
 function drawFallingPipes() {
     push();
@@ -464,6 +478,117 @@ function drawFallingPipes() {
     }
     pop();
 }
+
+
+/**
+ * GOLD BIRD functions
+ */
+
+//Create pipe + sometimes create coins 
+function createPipeAndMaybeCoin() {
+    // Normal pipe creation
+    const currentStage = difficultyProgression.getCurrentStage(score);
+    const gapSize = currentStage.gapSize;
+    const gapY = random(100, height - 100 - pipes.gap);
+    pipes.list.push({
+        x: width,
+        topHeight: gapY,
+        bottomHeight: height - (gapY + pipes.gap),
+        currentStage: currentStage
+    });
+
+    // 30% chance to create a coin
+    if (random() < 0.3) {
+        const coinY = random(50, height - 50);
+        coins.list.push({
+            x: width,
+            y: coinY
+        });
+    }
+}
+
+//Move pipes and coins
+function movePipesAndCoins() {
+    // Add new pipes periodically
+    if (frameCount % 100 === 0) {
+        createPipeAndMaybeCoin();
+    }
+
+    // Move existing pipes
+    for (let i = pipes.list.length - 1; i >= 0; i--) {
+        pipes.list[i].x -= pipes.speed;
+
+        // Remove pipes that are off the screen
+        if (pipes.list[i].x < -pipes.width) {
+            pipes.list.splice(i, 1);
+        }
+    }
+
+    // Move existing coins
+    for (let i = coins.list.length - 1; i >= 0; i--) {
+        coins.list[i].x -= coins.speed;
+
+        // Remove coins that are off the screen
+        if (coins.list[i].x < -coins.size) {
+            coins.list.splice(i, 1);
+        }
+    }
+}
+
+//Draw coins
+function drawCoins() {
+    push();
+    fill("#FFD700"); // Gold color for coins
+    for (let coin of coins.list) {
+        ellipse(coin.x, coin.y, coins.size);
+    }
+    pop();
+}
+
+//Colision checker with coins and coin score impact
+function checkCollisionsWithCoins() {
+    // Check bottom and top screen boundaries
+    if (bird.y >= height || bird.y <= 0) {
+        gameState = "lose";
+    }
+
+    // Check pipe collisions
+    for (let pipe of pipes.list) {
+        // Check if bird is within pipe's horizontal range
+        if (bird.x + bird.size / 2 > pipe.x && bird.x - bird.size / 2 < pipe.x + pipes.width) {
+            // Check top pipe collision
+            if (bird.y - bird.size / 2 < pipe.topHeight) {
+                gameState = "lose";
+            }
+            // Check bottom pipe collision
+            if (bird.y + bird.size / 2 > height - pipe.bottomHeight) {
+                gameState = "lose";
+            }
+        }
+        // Score point when passing pipe
+        if (pipe.x + pipes.width < bird.x && !pipe.scored) {
+            score++;
+            pipe.scored = true;
+        }
+    }
+    // Check coin collection
+    for (let i = coins.list.length - 1; i >= 0; i--) {
+        const coin = coins.list[i];
+        // Check if bird touches the coin
+        if (
+            bird.x + bird.size / 2 > coin.x - coins.size / 2 &&
+            bird.x - bird.size / 2 < coin.x + coins.size / 2 &&
+            bird.y + bird.size / 2 > coin.y - coins.size / 2 &&
+            bird.y - bird.size / 2 < coin.y + coins.size / 2
+        ) {
+            // Collect coin and add points
+            coins.list.splice(i, 1);
+            score += 3;
+        }
+    }
+}
+
+
 
 
 /**
@@ -496,6 +621,7 @@ function drawMenuScreen() {
     text("(2) Wavy Bird", width / 2, height / 2 + 40);
     text("(3) Progress Bird", width / 2, height / 2 + 80);
     text("(4) Falling Bird", width / 2, height / 2 + 120);
+    text("(5) Gold Bird", width / 2, height / 2 + 160);
     text("Click to FLY!", width / 2, height / 1.2);
     pop();
 }
@@ -536,10 +662,13 @@ function mousePressed() {
     } else if (gameState === "fallingBirdIntro") {
         gameState = "fallingBird";
         return;
+    } else if (gameState === "coinBirdIntro") {
+        gameState = "coinBird";
+        return;
     }
 
     // Game play actions
-    if (gameState === "flappyBird" || gameState === "wavyBird" || gameState === "progressBird") {
+    if (gameState === "flappyBird" || gameState === "wavyBird" || gameState === "progressBird" || gameState === "coinBird") {
         bird.velocity = bird.jumpStrength;
     } else if (gameState === "gravityBird") {
         bird.gravityDirection *= -1;
@@ -564,6 +693,8 @@ function keyPressed() {
             gameState = "progressBirdIntro";
         } else if (key === '4') {
             gameState = "fallingBirdIntro";
+        } else if (key === '5') {
+            gameState = "coinBirdIntro";
         }
     }
 }
@@ -576,6 +707,7 @@ function resetGame() {
     bird.velocity = 0;
     bird.gravityDirection = 1; // Reset gravity direction to downward
     pipes.list = [];
+    coins.list = []; // Reset coins list
     score = 0;
     bird.x = width / 2; //center bird horizontally 
     gameState = "menu";
@@ -652,6 +784,20 @@ function drawFallingBirdIntro() {
     textSize(22);
     text("Oh no you're falling! Better dodge the pipes!", width / 2, height / 2);
     text("[LEFT/RIGHT] Arrows to move", width / 2, height / 2 + 50);
+    text("Click anywhere to start", width / 2, height / 2 + 80);
+    pop();
+}
+
+//Draw GOLD bird intro
+function drawCoinBirdIntro() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("GOLD BIRD", width / 2, height / 2 - 50);
+    textSize(22);
+    text("Collect golden coins for extra points!", width / 2, height / 2);
+    text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
     text("Click anywhere to start", width / 2, height / 2 + 80);
     pop();
 }
