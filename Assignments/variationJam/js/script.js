@@ -403,25 +403,27 @@ function moveFallingPipes() {
         createFallingPipe();
     }
 
-    // Move existing pipes upward
+    // Move existing pipes upward (from bottom to top)
     for (let i = pipes.list.length - 1; i >= 0; i--) {
-        pipes.list[i].y -= pipes.speed; // Move upward
+        pipes.list[i].y -= pipes.speed;
 
-        // Remove pipes that are off the screen
-        if (pipes.list[i].y + pipes.width < 0) {
+        // Remove pipes that are off the top of the screen
+        if (pipes.list[i].y + pipes.height < 0) {
             pipes.list.splice(i, 1);
         }
     }
 }
 
-// Create falling pipes
+
+// Create horizontal pipes
 function createFallingPipe() {
-    const pipeX = random(50, width - pipes.width - 50); // Random x position within screen bounds
+    const pipeX = random(50, width - pipes.gap - 50); // Random x position within screen bounds
     pipes.list.push({
         x: pipeX,
         y: height, // Start from the bottom of the screen
-        width: pipes.width,
-        height: pipes.gap // Gap size becomes the pipe's height
+        width: pipes.gap, // Use gap size as pipe width
+        height: pipes.width, // Use standard pipe width as height
+        scored: false
     });
 }
 
@@ -436,22 +438,24 @@ function checkFallingBirdCollisions() {
     // Check pipe collisions
     for (let pipe of pipes.list) {
         if (
-            bird.y + bird.size / 2 > pipe.y && // Check if bird is within pipe's vertical range
-            bird.y - bird.size / 2 < pipe.y + pipe.height &&
             bird.x + bird.size / 2 > pipe.x && // Check if bird is within pipe's horizontal range
-            bird.x - bird.size / 2 < pipe.x + pipe.width
+            bird.x - bird.size / 2 < pipe.x + pipe.width &&
+            bird.y + bird.size / 2 > pipe.y && // Check if bird is within pipe's vertical range
+            bird.y - bird.size / 2 < pipe.y + pipe.height
         ) {
             gameState = "lose";
         }
 
         // Score point when bird passes the pipe
-        if (pipe.y + pipe.height < bird.y && !pipe.scored) {
+        if (pipe.x + pipe.width < bird.x && !pipe.scored) {
             score++;
             pipe.scored = true;
         }
     }
 }
 
+
+// Draw horizontal pipes
 function drawFallingPipes() {
     push();
     fill("#228B22"); // Green color
