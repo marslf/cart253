@@ -122,12 +122,12 @@ function draw() {
     } else if (gameState === "fallingBirdIntro") {
         drawFallingBirdIntro();
     } else if (gameState === "fallingBird") {
-        moveFallingBird(); //Falling bird movement
-        moveRisingPipes(); //Falling pipe function
+        moveFallingBird(); // Falling Bird movement
+        moveFallingPipes(); // Falling Pipe movement
         drawBird();
-        drawFallingPipes();
+        drawFallingPipes(); // Draw the falling pipes
         drawScore();
-        checkFallingBirdCollisions();
+        checkFallingBirdCollisions(); // Check for falling bird collisions
     } else if (gameState === "lose") {
         drawLoseScreen();
     }
@@ -382,58 +382,70 @@ function drawDifficultyIndicator() {
 
 //Falling bird movement
 function moveFallingBird() {
+    // Smooth horizontal movement
+    if (keyIsDown(LEFT_ARROW)) {
+        bird.x -= 5;
+    }
+    if (keyIsDown(RIGHT_ARROW)) {
+        bird.x += 5;
+    }
+
     // Keep bird fixed vertically
     bird.y = height / 3;
-
     // Only allow horizontal movement but keep bird on screen 
     bird.x = constrain(bird.x, 0, width);
 }
 
-// Modified pipe movement for rising pipes
-function moveRisingPipes() {
+// Modified pipe movement for falling pipes
+function moveFallingPipes() {
     // Add new pipes periodically
     if (frameCount % 100 === 0) {
-        createRisingPipe();
+        createFallingPipe();
     }
 
     // Move existing pipes upward
     for (let i = pipes.list.length - 1; i >= 0; i--) {
-        pipes.list[i].y -= pipes.speed;
+        pipes.list[i].y -= pipes.speed; // Move upward
 
-        // Remove pipes that are off the top of the screen
-        if (pipes.list[i].y + pipes.height < 0) {
+        // Remove pipes that are off the screen
+        if (pipes.list[i].y + pipes.width < 0) {
             pipes.list.splice(i, 1);
         }
     }
 }
 
-// Create rising pipes
-function createRisingPipe() {
-    const gapX = random(0, width - pipes.gap);
+// Create falling pipes
+function createFallingPipe() {
+    const pipeX = random(50, width - pipes.width - 50); // Random x position within screen bounds
     pipes.list.push({
-        y: height,
-        x: gapX,
-        height: 50, // Pipe height
-        scored: false
+        x: pipeX,
+        y: height, // Start from the bottom of the screen
+        width: pipes.width,
+        height: pipes.gap // Gap size becomes the pipe's height
     });
 }
 
+
 // Collision detection for Falling Bird
 function checkFallingBirdCollisions() {
+    // Check side boundaries
+    if (bird.x <= 0 || bird.x + bird.size >= width) {
+        gameState = "lose";
+    }
+
     // Check pipe collisions
     for (let pipe of pipes.list) {
-        // Check if bird is within pipe's horizontal range
-        if (bird.x + bird.size / 2 > pipe.x &&
-            bird.x - bird.size / 2 < pipe.x + pipes.width) {
-
-            // Check collision with pipe
-            if (pipe.y < bird.y + bird.size / 2 && pipe.y + pipe.height > bird.y - bird.size / 2) {
-                gameState = "lose";
-            }
+        if (
+            bird.y + bird.size / 2 > pipe.y && // Check if bird is within pipe's vertical range
+            bird.y - bird.size / 2 < pipe.y + pipe.height &&
+            bird.x + bird.size / 2 > pipe.x && // Check if bird is within pipe's horizontal range
+            bird.x - bird.size / 2 < pipe.x + pipe.width
+        ) {
+            gameState = "lose";
         }
 
-        // Score point when passing pipe
-        if (pipe.y + pipe.height < height / 2 && !pipe.scored) {
+        // Score point when bird passes the pipe
+        if (pipe.y + pipe.height < bird.y && !pipe.scored) {
             score++;
             pipe.scored = true;
         }
@@ -444,11 +456,10 @@ function drawFallingPipes() {
     push();
     fill("#228B22"); // Green color
     for (let pipe of pipes.list) {
-        rect(pipe.x, pipe.y, pipes.width, pipe.height);
+        rect(pipe.x, pipe.y, pipe.width, pipe.height);
     }
     pop();
 }
-
 
 
 /**
@@ -551,16 +562,6 @@ function keyPressed() {
             gameState = "fallingBirdIntro";
         }
     }
-
-    //FALLING BIRD controls for left and right movement
-    if (gameState === "fallingBird") {
-        if (keyCode === LEFT_ARROW) {
-            bird.x -= 20; // Move left
-        } else if (keyCode === RIGHT_ARROW) {
-            bird.x += 20; // Move right
-        }
-    }
-
 }
 
 
@@ -645,7 +646,7 @@ function drawFallingBirdIntro() {
     fill(255);
     text("FALLING BIRD", width / 2, height / 2 - 50);
     textSize(22);
-    text("Dodge the rising pipes!", width / 2, height / 2);
+    text("Oh no you're falling! Better dodge the pipes!", width / 2, height / 2);
     text("[LEFT/RIGHT] Arrows to move", width / 2, height / 2 + 50);
     text("Click anywhere to start", width / 2, height / 2 + 80);
     pop();
