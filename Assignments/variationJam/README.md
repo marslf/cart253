@@ -1,6 +1,7 @@
 # Template p5 Project
 
-Author Name
+BIRD
+by Mars Lapierre-Furtado
 
 [View this project online](URL_FOR_THE_RUNNING_PROJECT)
 

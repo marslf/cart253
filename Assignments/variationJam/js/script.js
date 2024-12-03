@@ -1,5 +1,5 @@
 /**
- * Title of Project
+ * BIRD
  * Mars Lapierre-Furtado
  * 
  * PROJECT DESCRIPTION
@@ -9,7 +9,7 @@
 "use strict";
 
 // Game states
-let gameState = "start"; // States: "start", "menu", "flappyBird", "lose"
+let gameState = "start"; // States: "start", "menu", "flappyBird", "gravityBird", "doubleBird", "lose"
 
 // Player (bird)
 const bird = {
@@ -25,7 +25,7 @@ const bird = {
 const pipes = {
     width: 50,
     speed: 3,
-    gap: 150, // Space between top and bottom pipes
+    gap: 180, // Space between top and bottom pipes
     list: []
 };
 
@@ -63,7 +63,15 @@ function draw() {
         drawPipes();
         drawScore();
         checkCollisions();
-    } else if (gameState === "lose") {
+    } else if (gameState === "gravityBird") { //similar to regular game mode but with gravity=specific mechanics
+        moveBirdWithReversedGravity();
+        movePipes();
+        drawBirdWithDirectionIndicator();
+        drawPipes();
+        drawScore();
+        checkGravityBirdCollisions();
+    }
+    else if (gameState === "lose") {
         drawLoseScreen();
     }
 }
@@ -114,12 +122,20 @@ function createPipe() {
 
 /**
  * Draw the bird
+ * 
+ *with dark outline
+ *with small wing
  */
 function drawBird() {
     push();
-    fill("#FFD700");
-    noStroke();
+    // Main bird body
+    fill("#FFD700"); // Original gold color
     ellipse(bird.x, bird.y, bird.size);
+
+    // Wing (small circle on lower left)
+    fill("#FFA500"); // Orange wing color
+    ellipse(bird.x - bird.size / 3, bird.y + bird.size / 3, bird.size / 3);
+
     pop();
 }
 
@@ -170,6 +186,75 @@ function checkCollisions() {
 }
 
 /**
+ * GRAVITY BIRD SPECIFIC FUNCTIONS
+ */
+
+//Move the bird and update its position
+function moveBirdWithReversedGravity() {
+    //Gravity direction property to the bird
+    if (!bird.gravityDirection) {
+        bird.gravityDirection = 1; // Default downward
+    }
+
+    // Apply gravity in the current direction
+    bird.velocity += bird.gravity * bird.gravityDirection;
+    bird.y += bird.velocity;
+
+    // Prevent bird from going off the bottom or top of the screen
+    bird.y = constrain(bird.y, 0, height);
+}
+
+//Draw specific gravity bird w/ direction indicator
+function drawBirdWithDirectionIndicator() {
+    push();
+    // Change color based on gravity direction
+    if (bird.gravityDirection === 1) {
+        fill("#FFD700"); // Gold when gravity is down
+    } else {
+        fill("#4169E1"); // Royal Blue when gravity is up
+    }
+
+    ellipse(bird.x, bird.y, bird.size);
+
+    // Wing (small circle on lower left)
+    fill("#FFA500"); // Orange wing color
+    ellipse(bird.x - bird.size / 3, bird.y + bird.size / 3, bird.size / 3);
+
+    pop();
+}
+
+//Create modified gravity collision checker
+function checkGravityBirdCollisions() {
+    // Check bottom and top screen boundaries
+    if (bird.y >= height || bird.y <= 0) {
+        gameState = "lose";
+    }
+
+    // Check pipe collisions
+    for (let pipe of pipes.list) {
+        // Check if bird is within pipe's horizontal range
+        if (bird.x + bird.size / 2 > pipe.x && bird.x - bird.size / 2 < pipe.x + pipes.width) {
+            // Check top pipe collision
+            if (bird.y - bird.size / 2 < pipe.topHeight) {
+                gameState = "lose";
+            }
+            // Check bottom pipe collision
+            if (bird.y + bird.size / 2 > height - pipe.bottomHeight) {
+                gameState = "lose";
+            }
+        }
+
+        // Score point when passing pipe
+        if (pipe.x + pipes.width < bird.x && !pipe.scored) {
+            score++;
+            pipe.scored = true;
+        }
+    }
+}
+
+
+
+/**
  * Display the score
  */
 function drawScore() {
@@ -192,7 +277,8 @@ function drawStartScreen() {
     fill(255);
     text("Flappy Bird", width / 2, height / 2 - 50);
     textSize(24);
-    text("Click to Start", width / 2, height / 2);
+    //text("Click to Start", width / 2, height / 2);
+    text("Click to FLY!", width / 2, height / 1.5);
     pop();
 }
 
@@ -204,7 +290,7 @@ function drawMenuScreen() {
     textAlign(CENTER, CENTER);
     textSize(34);
     fill(255);
-    text("Flappy Bird", width / 2, height / 2 - 50);
+    text("Flappy Bird", width / 2, height / 2 - 150);
     textSize(24);
     text("(0) Flappy Bird", width / 2, height / 2 - 40);
     text("(1) Gravity Bird", width / 2, height / 2);
@@ -233,12 +319,33 @@ function drawLoseScreen() {
 function mousePressed() {
     if (gameState === "start") {
         gameState = "menu";
-    } else if (gameState === "play") {
+    } else if (gameState === "flappyBird" || gameState === "doubleBird") {
         bird.velocity = bird.jumpStrength;
+    } else if (gameState === "gravityBird") {
+        // Reverse gravity direction
+        bird.gravityDirection *= -1;
+        // Add a small velocity change to make direction change more responsive
+        bird.velocity = bird.jumpStrength * bird.gravityDirection;
     } else if (gameState === "lose") {
         resetGame();
     }
 }
+
+/**
+ * Handle different game mode state changes
+ */
+function keyPressed() {
+    if (gameState === "menu") {
+        if (key === '0') {
+            gameState = "flappyBird";
+        } else if (key === '1') {
+            gameState = "gravityBird";
+        } else if (key === '2') {
+            gameState = "doubleBird";
+        }
+    }
+}
+
 
 /**
  * Reset the game to initial state
@@ -246,6 +353,7 @@ function mousePressed() {
 function resetGame() {
     bird.y = height / 2;
     bird.velocity = 0;
+    bird.gravityDirection = 1; // Reset gravity direction to downward
     pipes.list = [];
     score = 0;
     gameState = "start";
