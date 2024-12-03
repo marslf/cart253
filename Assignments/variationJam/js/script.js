@@ -9,7 +9,7 @@
 "use strict";
 
 // Game states
-let gameState = "start"; // States: "start", "menu", "play", "lose"
+let gameState = "start"; // States: "start", "menu", "flappyBird", "lose"
 
 // Player (bird)
 const bird = {
@@ -42,13 +42,21 @@ function setup() {
 
 /**
  * Main draw loop
+ * 
+ * draw the start screen
+ * draw the menu screen
+ * draw the flappyBird (default mode) screen
+ * draw the lose screen
+ * 
  */
 function draw() {
     background("#87CEEB"); // Sky blue background
 
     if (gameState === "start") {
         drawStartScreen();
-    } else if (gameState === "play") {
+    } else if (gameState === "menu") {
+        drawMenuScreen();
+    } else if (gameState === "flappyBird") {
         moveBird();
         movePipes();
         drawBird();
@@ -109,7 +117,7 @@ function createPipe() {
  */
 function drawBird() {
     push();
-    fill("#FFD700"); // Gold color
+    fill("#FFD700");
     noStroke();
     ellipse(bird.x, bird.y, bird.size);
     pop();
@@ -220,13 +228,12 @@ function drawLoseScreen() {
 }
 
 /**
- * Handle mouse/key input
+ * Handle mouse/key input depending on the game state
  */
 function mousePressed() {
     if (gameState === "start") {
         gameState = "menu";
     } else if (gameState === "play") {
-        // Make the bird jump
         bird.velocity = bird.jumpStrength;
     } else if (gameState === "lose") {
         resetGame();
