@@ -9,7 +9,7 @@
 "use strict";
 
 // Game states
-let gameState = "menu"; // States: "menu", "flappyBird", "gravityBird", "wavyBird", "progressBird" "lose"
+let gameState = "menu"; // States: "menu", "flappyBirdIntro", "flappyBird", "gravityBirdIntro", "gravityBird", "wavyBirdIntro", "wavyBird", "progressBirdIntro", "progressBird" "lose"
 
 // Player (bird)
 const bird = {
@@ -82,6 +82,8 @@ function draw() {
 
     if (gameState === "menu") {
         drawMenuScreen();
+    } else if (gameState === "flappyBirdIntro") {
+        drawFlappyBirdIntro();
     } else if (gameState === "flappyBird") {
         moveBird();
         movePipes();
@@ -89,6 +91,8 @@ function draw() {
         drawPipes();
         drawScore();
         checkCollisions();
+    } else if (gameState === "gravityBirdIntro") {
+        drawGravityBirdIntro();
     } else if (gameState === "gravityBird") { //similar to regular game mode but with gravity=specific mechanics
         moveBirdWithReversedGravity();
         movePipes();
@@ -96,6 +100,17 @@ function draw() {
         drawPipes();
         drawScore();
         checkGravityBirdCollisions();
+    } else if (gameState === "wavyBirdIntro") {
+        drawWavyBirdIntro();
+    } else if (gameState === "wavyBird") {
+        moveBird();
+        moveWavyPipes(); //Wavy pipe function
+        drawBird();
+        drawPipes();
+        drawScore();
+        checkCollisions();
+    } else if (gameState === "progressBirdIntro") {
+        drawProgressBirdIntro();
     } else if (gameState === "progressBird") {
         moveBird();
         movePipes();
@@ -103,13 +118,6 @@ function draw() {
         drawPipes();
         drawScore();
         drawDifficultyIndicator(); // New difficulty visualization
-        checkCollisions();
-    } else if (gameState === "wavyBird") {
-        moveBird();
-        moveWavyPipes(); //Wavy pipe function
-        drawBird();
-        drawPipes();
-        drawScore();
         checkCollisions();
     } else if (gameState === "lose") {
         drawLoseScreen();
@@ -296,6 +304,7 @@ function checkGravityBirdCollisions() {
 }
 
 
+
 /**
  * WAVY BIRD SPECIFIC FUNCTIONS
  */
@@ -408,28 +417,48 @@ function drawLoseScreen() {
 
 //Handle mouse/key input depending on the game state
 function mousePressed() {
-    if (gameState === "flappyBird" || gameState === "wavyBird" || gameState === "progressBird") { //regular mousePressed output
+    if (gameState === "menu") {
+        return; // Do nothing in menu
+    }
+
+    if (gameState === "flappyBirdIntro") {
+        gameState = "flappyBird";
+        return;
+    } else if (gameState === "gravityBirdIntro") {
+        gameState = "gravityBird";
+        return;
+    } else if (gameState === "wavyBirdIntro") {
+        gameState = "wavyBird";
+        return;
+    } else if (gameState === "progressBirdIntro") {
+        gameState = "progressBird";
+        return;
+    }
+
+    // Game play actions
+    if (gameState === "flappyBird" || gameState === "wavyBird" || gameState === "progressBird") {
         bird.velocity = bird.jumpStrength;
     } else if (gameState === "gravityBird") {
-        bird.gravityDirection *= -1; // Reverse gravity direction
-        bird.velocity = bird.jumpStrength * bird.gravityDirection; // Add a small velocity change to make direction change more responsive
+        bird.gravityDirection *= -1;
+        bird.velocity = bird.jumpStrength * bird.gravityDirection;
     } else if (gameState === "lose") {
         resetGame();
     }
 }
 
 
+
 //Handle different game mode state changes
 function keyPressed() {
     if (gameState === "menu") {
         if (key === '0') {
-            gameState = "flappyBird";
+            gameState = "flappyBirdIntro";
         } else if (key === '1') {
-            gameState = "gravityBird";
+            gameState = "gravityBirdIntro";
         } else if (key === '2') {
-            gameState = "wavyBird";
+            gameState = "wavyBirdIntro";
         } else if (key === '3') {
-            gameState = "progressBird"
+            gameState = "progressBirdIntro"
         }
     }
 }
@@ -446,4 +475,62 @@ function resetGame() {
     gameState = "menu";
 }
 
+/**
+ * INTRO SCREENS
+ */
 
+//Draw FLAPPY bird intro
+function drawFlappyBirdIntro() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("FLAPPY BIRD", width / 2, height / 2 - 50);
+    textSize(22);
+    text("Always stay flapping!" + score, width / 2, height / 2);
+    text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
+    text("Click anywhere to start", width / 2, height / 2 + 80);
+    pop();
+}
+
+//Draw GRAVITY bird intro
+function drawGravityBirdIntro() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("GRAVITY BIRD", width / 2, height / 2 - 50);
+    textSize(22);
+    text("No flapping, just gravitating!" + score, width / 2, height / 2);
+    text("[CLICK] to switch gravity", width / 2, height / 2 + 50);
+    text("(Click anywhere to start)", width / 2, height / 2 + 80);
+    pop();
+}
+
+//Draw WAVY bird intro
+function drawWavyBirdIntro() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("WAVY BIRD", width / 2, height / 2 - 50);
+    textSize(22);
+    text("Keep flying, watch for the pipes!" + score, width / 2, height / 2);
+    text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
+    text("(Click anywhere to start)", width / 2, height / 2 + 80);
+    pop();
+}
+
+//Draw PROGRESS bird intro
+function drawProgressBirdIntro() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("PROGRESS BIRD", width / 2, height / 2 - 50);
+    textSize(22);
+    text("Oh no! It's gonna get difficulty!" + score, width / 2, height / 2);
+    text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
+    text("Click anywhere to start", width / 2, height / 2 + 80);
+    pop();
+}
