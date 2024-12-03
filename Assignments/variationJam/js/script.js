@@ -9,7 +9,7 @@
 "use strict";
 
 // Game states
-let gameState = "menu"; // States: "menu", "flappyBirdIntro", "flappyBird", "gravityBirdIntro", "gravityBird", "wavyBirdIntro", "wavyBird", "progressBirdIntro", "progressBird" "lose"
+let gameState = "menu"; // States: "menu", "flappyBirdIntro", "flappyBird", "gravityBirdIntro", "gravityBird", "wavyBirdIntro", "wavyBird", "progressBirdIntro", "progressBird", "fallingBirdIntro", "fallingBird", "lose"
 
 // Player (bird)
 const bird = {
@@ -119,6 +119,15 @@ function draw() {
         drawScore();
         drawDifficultyIndicator(); // New difficulty visualization
         checkCollisions();
+    } else if (gameState === "fallingBirdIntro") {
+        drawFallingBirdIntro();
+    } else if (gameState === "fallingBird") {
+        moveFallingBird(); //Falling bird movement
+        moveRisingPipes(); //Falling pipe function
+        drawBird();
+        drawPipes();
+        drawScore();
+        checkFallingBirdCollisions();
     } else if (gameState === "lose") {
         drawLoseScreen();
     }
@@ -306,7 +315,7 @@ function checkGravityBirdCollisions() {
 
 
 /**
- * WAVY BIRD SPECIFIC FUNCTIONS
+ * WAVY BIRD funcitons
  */
 
 //Moving Pipes function
@@ -342,7 +351,7 @@ function moveWavyPipes() {
 
 
 /**
- * PROGRESS BIRD
+ * PROGRESS BIRD functions
  */
 
 //Visual indicator of current difficulty stage
@@ -363,6 +372,77 @@ function drawDifficultyIndicator() {
     textAlign(LEFT, TOP);
     text(`Difficulty: ${currentStage.gapSize}px gap`, 10, 10);
     pop();
+}
+
+
+
+/**
+ * FALLING BIRD functions
+ */
+
+//Falling bird movement
+function moveFallingBird() {
+    // Constant downward movement
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    // Keep bird on screen horizontally
+    bird.x = constrain(bird.x, 0, width);
+}
+
+// Modified pipe movement for rising pipes
+function moveRisingPipes() {
+    // Add new pipes periodically
+    if (frameCount % 100 === 0) {
+        createRisingPipe();
+    }
+
+    // Move existing pipes upward
+    for (let i = pipes.list.length - 1; i >= 0; i--) {
+        pipes.list[i].y -= pipes.speed;
+
+        // Remove pipes that are off the top of the screen
+        if (pipes.list[i].y + pipes.height < 0) {
+            pipes.list.splice(i, 1);
+        }
+    }
+}
+
+// Create rising pipes
+function createRisingPipe() {
+    const gapX = random(0, width - pipes.gap);
+    pipes.list.push({
+        y: height,
+        x: gapX,
+        height: 50 // Pipe height
+    });
+}
+
+// Collision detection for Falling Bird
+function checkFallingBirdCollisions() {
+    // Check bottom and top screen boundaries
+    if (bird.y >= height || bird.y <= 0) {
+        gameState = "lose";
+    }
+
+    // Check pipe collisions
+    for (let pipe of pipes.list) {
+        // Check if bird is within pipe's horizontal range
+        if (bird.x + bird.size / 2 > pipe.x &&
+            bird.x - bird.size / 2 < pipe.x + pipes.width) {
+
+            // Check collision with pipe
+            if (bird.y + bird.size / 2 > pipe.y) {
+                gameState = "lose";
+            }
+        }
+
+        // Score point when passing pipe
+        if (pipe.y + pipe.height < bird.y && !pipe.scored) {
+            score++;
+            pipe.scored = true;
+        }
+    }
 }
 
 
@@ -433,6 +513,9 @@ function mousePressed() {
     } else if (gameState === "progressBirdIntro") {
         gameState = "progressBird";
         return;
+    } else if (gameState === "fallingBirdIntro") {
+        gameState = "fallingBird";
+        return;
     }
 
     // Game play actions
@@ -458,9 +541,21 @@ function keyPressed() {
         } else if (key === '2') {
             gameState = "wavyBirdIntro";
         } else if (key === '3') {
-            gameState = "progressBirdIntro"
+            gameState = "progressBirdIntro";
+        } else if (key === '4') {
+            gameState = "fallingBirdIntro";
         }
     }
+
+    //FALLING BIRD controls for left and right movement
+    if (gameState === "fallingBird") {
+        if (keyCode === LEFT_ARROW) {
+            bird.x -= 20; // Move left
+        } else if (keyCode === RIGHT_ARROW) {
+            bird.x += 20; // Move right
+        }
+    }
+
 }
 
 
@@ -487,7 +582,7 @@ function drawFlappyBirdIntro() {
     fill(255);
     text("FLAPPY BIRD", width / 2, height / 2 - 50);
     textSize(22);
-    text("Always stay flapping!" + score, width / 2, height / 2);
+    text("Always stay flapping!", width / 2, height / 2);
     text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
     text("Click anywhere to start", width / 2, height / 2 + 80);
     pop();
@@ -501,7 +596,7 @@ function drawGravityBirdIntro() {
     fill(255);
     text("GRAVITY BIRD", width / 2, height / 2 - 50);
     textSize(22);
-    text("No flapping, just gravitating!" + score, width / 2, height / 2);
+    text("No flapping, just gravitating!", width / 2, height / 2);
     text("[CLICK] to switch gravity", width / 2, height / 2 + 50);
     text("(Click anywhere to start)", width / 2, height / 2 + 80);
     pop();
@@ -515,7 +610,7 @@ function drawWavyBirdIntro() {
     fill(255);
     text("WAVY BIRD", width / 2, height / 2 - 50);
     textSize(22);
-    text("Keep flying, watch for the pipes!" + score, width / 2, height / 2);
+    text("Keep flying, watch for the pipes!", width / 2, height / 2);
     text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
     text("(Click anywhere to start)", width / 2, height / 2 + 80);
     pop();
@@ -529,8 +624,22 @@ function drawProgressBirdIntro() {
     fill(255);
     text("PROGRESS BIRD", width / 2, height / 2 - 50);
     textSize(22);
-    text("Oh no! It's gonna get difficulty!" + score, width / 2, height / 2);
+    text("Oh no! It's gonna get difficulty!", width / 2, height / 2);
     text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
+    text("Click anywhere to start", width / 2, height / 2 + 80);
+    pop();
+}
+
+//Draw FALLING bird intro
+function drawFallingBirdIntro() {
+    push();
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255);
+    text("FALLING BIRD", width / 2, height / 2 - 50);
+    textSize(22);
+    text("Dodge the rising pipes!", width / 2, height / 2);
+    text("[LEFT/RIGHT] Arrows to move", width / 2, height / 2 + 50);
     text("Click anywhere to start", width / 2, height / 2 + 80);
     pop();
 }
