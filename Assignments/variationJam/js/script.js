@@ -77,10 +77,12 @@ function setup() {
 /**
  * Main draw loop
  * 
- * draw the menu screen
- * draw the flappyBird (default mode)
- * draw the GravityBird
- * draw WavyBird
+ * draw menu screen
+ * draw flappyBird (default mode)
+ * draw GravityBird
+ * draw wavyBird
+ * draw progressBird
+ * draw goldBird
  * draw the lose screen
  * 
  */
@@ -135,9 +137,9 @@ function draw() {
         drawFallingPipes(); // Draw the falling pipes
         drawScore();
         checkFallingBirdCollisions(); // Check for falling bird collisions
-    } else if (gameState === "coinBirdIntro") {
-        drawCoinBirdIntro();
-    } else if (gameState === "coinBird") { //GOLD BIRD
+    } else if (gameState === "goldBirdIntro") {
+        drawGoldBirdIntro();
+    } else if (gameState === "goldBird") { //GOLD BIRD
         moveBird();
         movePipesAndCoins();
         drawBird();
@@ -485,21 +487,51 @@ function drawFallingPipes() {
  */
 
 //Create pipe + sometimes create coins 
-function createPipeAndMaybeCoin() {
-    // Normal pipe creation
+function createPipeAndCoin() {
+    // Create pipe as normal
     const currentStage = difficultyProgression.getCurrentStage(score);
     const gapSize = currentStage.gapSize;
     const gapY = random(100, height - 100 - pipes.gap);
-    pipes.list.push({
+    const newPipe = {
         x: width,
         topHeight: gapY,
         bottomHeight: height - (gapY + pipes.gap),
         currentStage: currentStage
-    });
+    };
+    pipes.list.push(newPipe);
 
     // 30% chance to create a coin
     if (random() < 0.3) {
-        const coinY = random(50, height - 50);
+        // Try to find a safe coin position
+        let coinY;
+        let isSafe;
+        let attempts = 0;
+
+        do {
+            // Reset safety flag
+            isSafe = true;
+
+            // Generate a random Y position
+            coinY = random(50, height - 50);
+
+            // Check against the newly created pipe
+            if (
+                coinY < newPipe.topHeight ||  // Coin in top pipe area
+                coinY > height - newPipe.bottomHeight  // Coin in bottom pipe area
+            ) {
+                isSafe = false;
+            }
+
+            // Increment attempts to prevent infinite loop
+            attempts++;
+
+            // If we can't find a safe spot after 10 tries, skip coin creation
+            if (attempts > 10) {
+                return;
+            }
+        } while (!isSafe);
+
+        // If we found a safe position, create the coin
         coins.list.push({
             x: width,
             y: coinY
@@ -511,7 +543,7 @@ function createPipeAndMaybeCoin() {
 function movePipesAndCoins() {
     // Add new pipes periodically
     if (frameCount % 100 === 0) {
-        createPipeAndMaybeCoin();
+        createPipeAndCoin();
     }
 
     // Move existing pipes
@@ -662,13 +694,13 @@ function mousePressed() {
     } else if (gameState === "fallingBirdIntro") {
         gameState = "fallingBird";
         return;
-    } else if (gameState === "coinBirdIntro") {
-        gameState = "coinBird";
+    } else if (gameState === "goldBirdIntro") {
+        gameState = "goldBird";
         return;
     }
 
     // Game play actions
-    if (gameState === "flappyBird" || gameState === "wavyBird" || gameState === "progressBird" || gameState === "coinBird") {
+    if (gameState === "flappyBird" || gameState === "wavyBird" || gameState === "progressBird" || gameState === "goldBird") {
         bird.velocity = bird.jumpStrength;
     } else if (gameState === "gravityBird") {
         bird.gravityDirection *= -1;
@@ -694,7 +726,7 @@ function keyPressed() {
         } else if (key === '4') {
             gameState = "fallingBirdIntro";
         } else if (key === '5') {
-            gameState = "coinBirdIntro";
+            gameState = "goldBirdIntro";
         }
     }
 }
@@ -789,12 +821,12 @@ function drawFallingBirdIntro() {
 }
 
 //Draw GOLD bird intro
-function drawCoinBirdIntro() {
+function drawGoldBirdIntro() {
     push();
     textAlign(CENTER, CENTER);
     textSize(32);
     fill(255);
-    text("GOLD BIRD", width / 2, height / 2 - 50);
+    text("COIN BIRD", width / 2, height / 2 - 50);
     textSize(22);
     text("Collect golden coins for extra points!", width / 2, height / 2);
     text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
