@@ -7,7 +7,8 @@ by Mars Lapierre-Furtado
 
 ## Description
 
-This description should help the reader understand what the program is, what any controls do, and perhaps what the desired experience it.
+This program creates a unique Flappy Bird-inspired game with multiple gameplay modes using p5.js. The game offers six distinct variations that challenge the player's reflexes and adaptability. Players navigate a small bird through increasingly complex obstacle courses, with each mode introducing a radical twist to the classic side-scrolling gameplay.
+The core mechanics remain consistent: players use mouse clicks or key presses to control the bird's movement, avoiding pipes and staying within the screen boundaries. However, each game mode completely transforms the gameplay experience. In the Gravity Bird mode, players can reverse gravity with each click. The Wavy Bird mode introduces unpredictable pipe movements. Progress Bird dynamically adjusts difficulty by progressively narrowing pipe gaps. Falling Bird requires horizontal navigation while keeping the bird vertically fixed. Gold Bird adds a coin collection element for bonus points. The ultimate challenge comes with Chaos Bird, where pipes spawn from multiple directions, testing the player's spatial awareness and reflexes. The game features intuitive menu and intro screens for each mode, providing clear instructions and setting the stage for each unique gameplay variation. 
 
 ## Credits
 

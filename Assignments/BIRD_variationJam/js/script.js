@@ -3,7 +3,40 @@
  * Mars Lapierre-Furtado
  * 
  * PROJECT DESCRIPTION
+ * - Multi-mode Flappy Bird-inspired game exploring unique gameplay mechanics
+ * - Six distinct game modes with varied bird and pipe interactions
+ * - Progressive difficulty system that challenges player adaptability
+ * - Experimental gameplay variations including:
+ *   * Classic Flappy Bird mode
+ *   * Gravity-reversing bird movement
+ *   * Wavy, unpredictable pipe movements
+ *   * Progressively narrowing pipe gaps
+ *   * Horizontal falling gameplay
+ *   * Coin collection mechanics
+ *   * Chaotic omnidirectional pipe spawning
+ * - Dynamic scoring and difficulty progression
+ * - Responsive game states with intuitive menu and intro screens
+ * - Uses p5.js for creative, interactive game design
  * 
+ * GAME MODES:
+ * - Flappy Bird (0): Traditional side-scrolling obstacle avoidance
+ * - Gravity Bird (1): Reverse gravity with click interactions
+ * - Wavy Bird (2): Pipes move vertically in wave-like patterns
+ * - Progress Bird (3): Dynamically increasing difficulty
+ * - Falling Bird (4): Horizontal movement, vertically fixed bird
+ * - Gold Bird (5): Coin collection for bonus points (3)
+ * - Chaos Bird (6): Pipes spawn from multiple directions
+ * 
+ * CONTROLS:
+ * Dependant on the game mode
+ * Shown before start
+ * - mouse click to bounce/flap upwards 
+ * - mouse click to switch gravity (gravity mode)
+ * - left and right arrow keys to move horizontally (falling and chaos mode)
+ * 
+ * Uses:
+ * p5.js
+ * https://p5js.org
  */
 
 "use strict";
