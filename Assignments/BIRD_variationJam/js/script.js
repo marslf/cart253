@@ -815,9 +815,9 @@ function drawChaosPipes() {
 
             case 'left':
                 // Top pipe
-                rect(0, 0, pipes.width, pipe.topHeight);
+                rect(pipe.x, 0, pipes.width, pipe.topHeight);
                 // Bottom pipe
-                rect(0, height - pipe.bottomHeight, pipes.width, pipe.bottomHeight);
+                rect(pipe.x, height - pipe.bottomHeight, pipes.width, pipe.bottomHeight);
                 break;
         }
     }
@@ -1138,6 +1138,7 @@ function drawChaosBirdIntro() {
     textSize(22);
     text("Pipes come from everywhere!", width / 2, height / 2);
     text("[CLICK] to flap your wings", width / 2, height / 2 + 50);
-    text("Click anywhere to start", width / 2, height / 2 + 80);
+    text("[LEFT/RIGHT] Arrows to move", width / 2, height / 2 + 80);
+    text("Click anywhere to start", width / 2, height / 2 + 120);
     pop();
 }
